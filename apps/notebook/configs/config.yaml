@@ -1,0 +1,16 @@
+http:
+  host: localhost
+  port: 5000
+grpc:
+  network: tcp
+  host: localhost
+  port: 50050
+db:
+  postgres:
+    driver: postgres
+    host: localhost
+    port: 5432
+    name: scribble
+    user: scribble
+    password: scribble
+    sslMode: disable
