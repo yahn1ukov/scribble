@@ -1,7 +1,10 @@
-.PHONY: compose-up migrate-up migrate-down generate-proto
+.PHONY: compose-up migrate-create migrate-up migrate-down generate-proto
 
 compose-up:
 	docker-compose -f ./deployments/$(file) up -d
+
+migrate-create:
+	migrate create -ext sql -dir ./scripts/migrations -seq $(name)
 
 migrate-up:
 	migrate -database $(url) -path ./scripts/migrations up

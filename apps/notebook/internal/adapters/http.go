@@ -57,7 +57,7 @@ func (h *HTTPHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 
 func (h *HTTPHandler) Update(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	id := r.PathValue("id")
+	id := r.PathValue("notebookId")
 
 	uuid, err := uuid.Parse(id)
 	if err != nil {
@@ -85,7 +85,7 @@ func (h *HTTPHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 func (h *HTTPHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	id := r.PathValue("id")
+	id := r.PathValue("notebookId")
 
 	uuid, err := uuid.Parse(id)
 	if err != nil {

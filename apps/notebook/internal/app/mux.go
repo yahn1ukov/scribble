@@ -11,8 +11,8 @@ func NewMux(handler *adapters.HTTPHandler) *http.ServeMux {
 
 	mux.HandleFunc("POST /notebooks", handler.Create)
 	mux.HandleFunc("GET /notebooks", handler.GetAll)
-	mux.HandleFunc("PATCH /notebooks/{id}", handler.Update)
-	mux.HandleFunc("DELETE /notebooks/{id}", handler.Delete)
+	mux.HandleFunc("PATCH /notebooks/{notebookId}", handler.Update)
+	mux.HandleFunc("DELETE /notebooks/{notebookId}", handler.Delete)
 
 	return mux
 }

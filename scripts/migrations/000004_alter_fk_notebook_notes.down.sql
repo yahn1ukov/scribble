@@ -1,0 +1,2 @@
+ALTER TABLE notes DROP CONSTRAINT IF EXISTS fk_notes_notebook;
+ALTER TABLE notes DROP COLUMN IF EXISTS notebook_id;

@@ -26,12 +26,12 @@ func NewGRPCServer(service ports.Service) *GRPCServer {
 }
 
 func (s *GRPCServer) Exists(ctx context.Context, req *pb.ExistsNotebookRequest) (*emptypb.Empty, error) {
-	id, err := uuid.Parse(req.Id)
+	uuid, err := uuid.Parse(req.Id)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	if err = s.service.Exists(ctx, id); err != nil {
+	if err = s.service.Exists(ctx, uuid); err != nil {
 		if errors.Is(err, domain.ErrNotFound) {
 			return nil, status.Error(codes.NotFound, err.Error())
 		}

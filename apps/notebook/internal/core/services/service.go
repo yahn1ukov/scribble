@@ -23,17 +23,16 @@ func (s *service) Exists(ctx context.Context, id uuid.UUID) error {
 	return s.repository.Exists(ctx, id)
 }
 
-func (s *service) Create(ctx context.Context, notebook *dto.CreateInput) error {
-	if notebook.Title == "" {
+func (s *service) Create(ctx context.Context, in *dto.CreateInput) error {
+	if in.Title == "" {
 		return domain.ErrTitleRequired
 	}
 
-	return s.repository.Create(
-		ctx,
-		&domain.Notebook{
-			Title: notebook.Title,
-		},
-	)
+	notebook := &domain.Notebook{
+		Title: in.Title,
+	}
+
+	return s.repository.Create(ctx, notebook)
 }
 
 func (s *service) GetAll(ctx context.Context) ([]*dto.GetOutput, error) {
@@ -57,17 +56,17 @@ func (s *service) GetAll(ctx context.Context) ([]*dto.GetOutput, error) {
 	return out, nil
 }
 
-func (s *service) Update(ctx context.Context, id uuid.UUID, updatedNotebook *dto.UpdateInput) error {
+func (s *service) Update(ctx context.Context, id uuid.UUID, in *dto.UpdateInput) error {
 	notebook, err := s.repository.Get(ctx, id)
 	if err != nil {
 		return err
 	}
 
-	if updatedNotebook.Title == "" {
+	if in.Title == "" {
 		return domain.ErrTitleRequired
 	}
 
-	notebook.Title = updatedNotebook.Title
+	notebook.Title = in.Title
 
 	return s.repository.Update(ctx, id, notebook)
 }
