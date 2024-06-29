@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package notebook;
+
+option go_package = "github.com/yahn1ukov/scribble/libs/grpc/notebook";
+
+import "google/protobuf/empty.proto";
+
+message ExistsNotebookRequest {
+    string id = 1;
+}
+
+service NotebookService {
+    rpc Exists(ExistsNotebookRequest) returns (google.protobuf.Empty);
+}
