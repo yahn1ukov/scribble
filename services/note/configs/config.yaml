@@ -5,6 +5,12 @@ grpc:
   notebook:
     host: localhost
     port: 50050
+  storage:
+    host: localhost
+    port: 50051
+  file:
+    host: localhost
+    port: 50052
 db:
   postgres:
     driver: postgres

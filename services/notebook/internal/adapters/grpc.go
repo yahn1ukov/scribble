@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 
-	"github.com/google/uuid"
 	pb "github.com/yahn1ukov/scribble/libs/grpc/notebook"
 	"github.com/yahn1ukov/scribble/services/notebook/internal/core/domain"
 	"github.com/yahn1ukov/scribble/services/notebook/internal/core/ports"
@@ -26,12 +25,7 @@ func NewGRPCServer(service ports.Service) *GRPCServer {
 }
 
 func (s *GRPCServer) Exists(ctx context.Context, req *pb.ExistsNotebookRequest) (*emptypb.Empty, error) {
-	id, err := uuid.Parse(req.Id)
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	if err = s.service.Exists(ctx, id); err != nil {
+	if err := s.service.Exists(ctx, req.Id); err != nil {
 		if errors.Is(err, domain.ErrNotFound) {
 			return nil, status.Error(codes.NotFound, err.Error())
 		}

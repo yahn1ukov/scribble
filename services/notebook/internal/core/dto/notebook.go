@@ -1,17 +1,13 @@
 package dto
 
-import (
-	"time"
-
-	"github.com/google/uuid"
-)
+import "time"
 
 type CreateInput struct {
 	Title string `json:"title" binding:"required"`
 }
 
 type GetOutput struct {
-	ID        uuid.UUID `json:"id"`
+	ID        string    `json:"id"`
 	Title     string    `json:"title"`
 	CreatedAt time.Time `json:"created_at"`
 }

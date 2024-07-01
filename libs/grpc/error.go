@@ -18,6 +18,13 @@ func (e *Error) Message() string {
 	return e.message
 }
 
+func CreateError(code codes.Code, message string) *Error {
+	return &Error{
+		code:    code,
+		message: message,
+	}
+}
+
 func ParseError(err error) *Error {
 	status, ok := status.FromError(err)
 	if !ok {

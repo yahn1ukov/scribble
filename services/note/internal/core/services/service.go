@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 
-	"github.com/google/uuid"
 	"github.com/yahn1ukov/scribble/services/note/internal/core/domain"
 	"github.com/yahn1ukov/scribble/services/note/internal/core/dto"
 	"github.com/yahn1ukov/scribble/services/note/internal/core/ports"
@@ -19,9 +18,9 @@ func NewService(repository ports.Repository) ports.Service {
 	}
 }
 
-func (s *service) Create(ctx context.Context, notebookId uuid.UUID, in *dto.CreateInput) error {
+func (s *service) Create(ctx context.Context, notebookId string, in *dto.CreateInput) (string, error) {
 	if in.Title == "" {
-		return domain.ErrTitleRequired
+		return "", domain.ErrTitleRequired
 	}
 
 	note := &domain.Note{
@@ -32,7 +31,7 @@ func (s *service) Create(ctx context.Context, notebookId uuid.UUID, in *dto.Crea
 	return s.repository.Create(ctx, notebookId, note)
 }
 
-func (s *service) GetAll(ctx context.Context, notebookId uuid.UUID) ([]*dto.GetOutput, error) {
+func (s *service) GetAll(ctx context.Context, notebookId string) ([]*dto.GetOutput, error) {
 	notes, err := s.repository.GetAll(ctx, notebookId)
 	if err != nil {
 		return nil, err
@@ -54,7 +53,7 @@ func (s *service) GetAll(ctx context.Context, notebookId uuid.UUID) ([]*dto.GetO
 	return out, nil
 }
 
-func (s *service) Get(ctx context.Context, id uuid.UUID, notebookId uuid.UUID) (*dto.GetOutput, error) {
+func (s *service) Get(ctx context.Context, id string, notebookId string) (*dto.GetOutput, error) {
 	note, err := s.repository.Get(ctx, id, notebookId)
 	if err != nil {
 		return nil, err
@@ -70,7 +69,7 @@ func (s *service) Get(ctx context.Context, id uuid.UUID, notebookId uuid.UUID) (
 	return out, nil
 }
 
-func (s *service) Update(ctx context.Context, id uuid.UUID, notebookId uuid.UUID, in *dto.UpdateInput) error {
+func (s *service) Update(ctx context.Context, id string, notebookId string, in *dto.UpdateInput) error {
 	note, err := s.repository.Get(ctx, id, notebookId)
 	if err != nil {
 		return err
@@ -86,6 +85,6 @@ func (s *service) Update(ctx context.Context, id uuid.UUID, notebookId uuid.UUID
 	return s.repository.Update(ctx, id, notebookId, note)
 }
 
-func (s *service) Delete(ctx context.Context, id uuid.UUID, notebookId uuid.UUID) error {
+func (s *service) Delete(ctx context.Context, id string, notebookId string) error {
 	return s.repository.Delete(ctx, id, notebookId)
 }

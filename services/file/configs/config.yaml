@@ -1,0 +1,16 @@
+grpc:
+  network: tcp
+  host: localhost
+  port: 50052
+db:
+  postgres:
+    driver: postgres
+    host: localhost
+    port: 5432
+    name: scribble
+    user: scribble
+    password: scribble
+    sslMode: disable
+storage:
+  minio:
+    bucket: scribble

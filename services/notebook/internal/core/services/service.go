@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 
-	"github.com/google/uuid"
 	"github.com/yahn1ukov/scribble/services/notebook/internal/core/domain"
 	"github.com/yahn1ukov/scribble/services/notebook/internal/core/dto"
 	"github.com/yahn1ukov/scribble/services/notebook/internal/core/ports"
@@ -19,7 +18,7 @@ func NewService(repository ports.Repository) ports.Service {
 	}
 }
 
-func (s *service) Exists(ctx context.Context, id uuid.UUID) error {
+func (s *service) Exists(ctx context.Context, id string) error {
 	return s.repository.Exists(ctx, id)
 }
 
@@ -56,7 +55,7 @@ func (s *service) GetAll(ctx context.Context) ([]*dto.GetOutput, error) {
 	return out, nil
 }
 
-func (s *service) Update(ctx context.Context, id uuid.UUID, in *dto.UpdateInput) error {
+func (s *service) Update(ctx context.Context, id string, in *dto.UpdateInput) error {
 	notebook, err := s.repository.Get(ctx, id)
 	if err != nil {
 		return err
@@ -71,6 +70,6 @@ func (s *service) Update(ctx context.Context, id uuid.UUID, in *dto.UpdateInput)
 	return s.repository.Update(ctx, id, notebook)
 }
 
-func (s *service) Delete(ctx context.Context, id uuid.UUID) error {
+func (s *service) Delete(ctx context.Context, id string) error {
 	return s.repository.Delete(ctx, id)
 }

@@ -5,7 +5,6 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/google/uuid"
 	"github.com/yahn1ukov/scribble/libs/respond"
 	"github.com/yahn1ukov/scribble/services/notebook/internal/core/domain"
 	"github.com/yahn1ukov/scribble/services/notebook/internal/core/dto"
@@ -57,12 +56,7 @@ func (h *HTTPHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 
 func (h *HTTPHandler) Update(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-
-	id, err := uuid.Parse(r.PathValue("notebookId"))
-	if err != nil {
-		respond.Error(w, http.StatusInternalServerError, err.Error())
-		return
-	}
+	id := r.PathValue("notebookId")
 
 	var in dto.UpdateInput
 	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
@@ -84,12 +78,7 @@ func (h *HTTPHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 func (h *HTTPHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-
-	id, err := uuid.Parse(r.PathValue("notebookId"))
-	if err != nil {
-		respond.Error(w, http.StatusInternalServerError, err.Error())
-		return
-	}
+	id := r.PathValue("notebookId")
 
 	if err := h.service.Delete(ctx, id); err != nil {
 		if errors.Is(err, domain.ErrNotFound) {

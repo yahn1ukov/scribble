@@ -4,7 +4,6 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/google/uuid"
 	"github.com/yahn1ukov/scribble/libs/respond"
 	"github.com/yahn1ukov/scribble/services/note/internal/core/domain"
 	"github.com/yahn1ukov/scribble/services/note/internal/core/dto"
@@ -15,25 +14,29 @@ import (
 type HTTPHandler struct {
 	service        ports.Service
 	notebookClient *NotebookGRPCClient
+	storageClient  *StorageGRPCClient
+	fileClient     *FileGRPCClient
 }
 
-func NewHTTPHandler(service ports.Service, notebookClient *NotebookGRPCClient) *HTTPHandler {
+func NewHTTPHandler(
+	service ports.Service,
+	notebookClient *NotebookGRPCClient,
+	storageClient *StorageGRPCClient,
+	fileClient *FileGRPCClient,
+) *HTTPHandler {
 	return &HTTPHandler{
 		service:        service,
 		notebookClient: notebookClient,
+		storageClient:  storageClient,
+		fileClient:     fileClient,
 	}
 }
 
 func (h *HTTPHandler) Create(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	notebookId := r.PathValue("notebookId")
 
-	notebookId, err := uuid.Parse(r.PathValue("notebookId"))
-	if err != nil {
-		respond.Error(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	if err = r.ParseMultipartForm(4 << 20); err != nil {
+	if err := r.ParseMultipartForm(1 << 20); err != nil {
 		respond.Error(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -52,8 +55,19 @@ func (h *HTTPHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = h.service.Create(ctx, notebookId, &in); err != nil {
+	id, err := h.service.Create(ctx, notebookId, &in)
+	if err != nil {
 		respond.Error(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if grpcErr := h.storageClient.Upload(ctx, id, in.Files); grpcErr != nil {
+		respond.Error(w, http.StatusBadRequest, grpcErr.Message())
+		return
+	}
+
+	if grpcErr := h.fileClient.Create(ctx, id, in.Files); grpcErr != nil {
+		respond.Error(w, http.StatusBadRequest, grpcErr.Message())
 		return
 	}
 
@@ -62,12 +76,7 @@ func (h *HTTPHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 func (h *HTTPHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-
-	notebookId, err := uuid.Parse(r.PathValue("notebookId"))
-	if err != nil {
-		respond.Error(w, http.StatusInternalServerError, err.Error())
-		return
-	}
+	notebookId := r.PathValue("notebookId")
 
 	if grpcErr := h.notebookClient.Exists(ctx, notebookId); grpcErr != nil {
 		if grpcErr.Code() == codes.NotFound {
@@ -89,18 +98,8 @@ func (h *HTTPHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 
 func (h *HTTPHandler) Get(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-
-	notebookId, err := uuid.Parse(r.PathValue("notebookId"))
-	if err != nil {
-		respond.Error(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	id, err := uuid.Parse(r.PathValue("noteId"))
-	if err != nil {
-		respond.Error(w, http.StatusInternalServerError, err.Error())
-		return
-	}
+	notebookId := r.PathValue("notebookId")
+	id := r.PathValue("noteId")
 
 	if grpcErr := h.notebookClient.Exists(ctx, notebookId); grpcErr != nil {
 		if grpcErr.Code() == codes.NotFound {
@@ -126,20 +125,10 @@ func (h *HTTPHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 func (h *HTTPHandler) Update(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	notebookId := r.PathValue("notebookId")
+	id := r.PathValue("noteId")
 
-	notebookId, err := uuid.Parse(r.PathValue("notebookId"))
-	if err != nil {
-		respond.Error(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	id, err := uuid.Parse(r.PathValue("noteId"))
-	if err != nil {
-		respond.Error(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	if err = r.ParseMultipartForm(4 << 20); err != nil {
+	if err := r.ParseMultipartForm(1 << 20); err != nil {
 		respond.Error(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -172,18 +161,8 @@ func (h *HTTPHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 func (h *HTTPHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-
-	notebookId, err := uuid.Parse(r.PathValue("notebookId"))
-	if err != nil {
-		respond.Error(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	id, err := uuid.Parse(r.PathValue("noteId"))
-	if err != nil {
-		respond.Error(w, http.StatusInternalServerError, err.Error())
-		return
-	}
+	notebookId := r.PathValue("notebookId")
+	id := r.PathValue("noteId")
 
 	if grpcErr := h.notebookClient.Exists(ctx, notebookId); grpcErr != nil {
 		if grpcErr.Code() == codes.NotFound {

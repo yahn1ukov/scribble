@@ -3,8 +3,6 @@ package dto
 import (
 	"mime/multipart"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type CreateInput struct {
@@ -14,7 +12,7 @@ type CreateInput struct {
 }
 
 type GetOutput struct {
-	ID        uuid.UUID               `json:"id"`
+	ID        string                  `json:"id"`
 	Title     string                  `json:"title"`
 	Body      string                  `json:"body"`
 	Files     []*multipart.FileHeader `json:"files,omitempty"`

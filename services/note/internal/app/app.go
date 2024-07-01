@@ -9,9 +9,11 @@ import (
 
 func New() *fx.App {
 	return fx.New(
-		fx.Provide(NewConfig, NewPostgres, NewNotebookGRPC, NewMux),
+		fx.Provide(NewConfig, NewPostgres, NewNotebookGRPC, NewStorageGRPC, NewFileGRPC, NewMux),
 		fx.Provide(
 			adapters.NewNotebookGRPCClient,
+			adapters.NewStorageGRPCClient,
+			adapters.NewFileGRPCClient,
 			adapters.NewHTTPHandler,
 			fx.Annotate(adapters.NewPostgresRepository, fx.As(new(ports.Repository))),
 			fx.Annotate(services.NewService, fx.As(new(ports.Service))),

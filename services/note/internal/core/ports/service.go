@@ -3,14 +3,13 @@ package ports
 import (
 	"context"
 
-	"github.com/google/uuid"
 	"github.com/yahn1ukov/scribble/services/note/internal/core/dto"
 )
 
 type Service interface {
-	Create(context.Context, uuid.UUID, *dto.CreateInput) error
-	GetAll(context.Context, uuid.UUID) ([]*dto.GetOutput, error)
-	Get(context.Context, uuid.UUID, uuid.UUID) (*dto.GetOutput, error)
-	Update(context.Context, uuid.UUID, uuid.UUID, *dto.UpdateInput) error
-	Delete(context.Context, uuid.UUID, uuid.UUID) error
+	Create(context.Context, string, *dto.CreateInput) (string, error)
+	GetAll(context.Context, string) ([]*dto.GetOutput, error)
+	Get(context.Context, string, string) (*dto.GetOutput, error)
+	Update(context.Context, string, string, *dto.UpdateInput) error
+	Delete(context.Context, string, string) error
 }

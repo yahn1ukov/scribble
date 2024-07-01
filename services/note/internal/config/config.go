@@ -11,6 +11,16 @@ type Config struct {
 			Host string `yaml:"host"`
 			Port int    `yaml:"port"`
 		} `yaml:"notebook"`
+
+		Storage struct {
+			Host string `yaml:"host"`
+			Port int    `yaml:"port"`
+		} `yaml:"storage"`
+
+		File struct {
+			Host string `yaml:"host"`
+			Port int    `yaml:"port"`
+		} `yaml:"file"`
 	} `yaml:"grpc"`
 
 	DB struct {

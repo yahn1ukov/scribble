@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/google/uuid"
 	"github.com/lib/pq"
 	"github.com/yahn1ukov/scribble/services/notebook/internal/core/domain"
 	"github.com/yahn1ukov/scribble/services/notebook/internal/core/ports"
@@ -21,7 +20,7 @@ func NewPostgresRepository(db *sql.DB) ports.Repository {
 	}
 }
 
-func (r *postgresRepository) Exists(ctx context.Context, id uuid.UUID) error {
+func (r *postgresRepository) Exists(ctx context.Context, id string) error {
 	query := "SELECT EXISTS (SELECT 1 FROM notebooks WHERE id = $1)"
 
 	var exists bool
@@ -76,7 +75,7 @@ func (r *postgresRepository) GetAll(ctx context.Context) ([]*domain.Notebook, er
 	return notebooks, nil
 }
 
-func (r *postgresRepository) Get(ctx context.Context, id uuid.UUID) (*domain.Notebook, error) {
+func (r *postgresRepository) Get(ctx context.Context, id string) (*domain.Notebook, error) {
 	query := "SELECT id, title, created_at FROM notebooks WHERE id = $1 LIMIT 1"
 
 	var notebook domain.Notebook
@@ -92,7 +91,7 @@ func (r *postgresRepository) Get(ctx context.Context, id uuid.UUID) (*domain.Not
 	return &notebook, nil
 }
 
-func (r *postgresRepository) Update(ctx context.Context, id uuid.UUID, notebook *domain.Notebook) error {
+func (r *postgresRepository) Update(ctx context.Context, id string, notebook *domain.Notebook) error {
 	query := "UPDATE notebooks SET title = $1 WHERE id = $2"
 
 	result, err := r.db.ExecContext(ctx, query, notebook.Title, id)
@@ -112,7 +111,7 @@ func (r *postgresRepository) Update(ctx context.Context, id uuid.UUID, notebook 
 	return nil
 }
 
-func (r *postgresRepository) Delete(ctx context.Context, id uuid.UUID) error {
+func (r *postgresRepository) Delete(ctx context.Context, id string) error {
 	query := "DELETE FROM notebooks WHERE id = $1"
 
 	result, err := r.db.ExecContext(ctx, query, id)
