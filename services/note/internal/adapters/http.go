@@ -14,20 +14,13 @@ import (
 type HTTPHandler struct {
 	service        ports.Service
 	notebookClient *NotebookGRPCClient
-	storageClient  *StorageGRPCClient
 	fileClient     *FileGRPCClient
 }
 
-func NewHTTPHandler(
-	service ports.Service,
-	notebookClient *NotebookGRPCClient,
-	storageClient *StorageGRPCClient,
-	fileClient *FileGRPCClient,
-) *HTTPHandler {
+func NewHTTPHandler(service ports.Service, notebookClient *NotebookGRPCClient, fileClient *FileGRPCClient) *HTTPHandler {
 	return &HTTPHandler{
 		service:        service,
 		notebookClient: notebookClient,
-		storageClient:  storageClient,
 		fileClient:     fileClient,
 	}
 }
@@ -61,12 +54,7 @@ func (h *HTTPHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if grpcErr := h.storageClient.Upload(ctx, id, in.Files); grpcErr != nil {
-		respond.Error(w, http.StatusBadRequest, grpcErr.Message())
-		return
-	}
-
-	if grpcErr := h.fileClient.Create(ctx, id, in.Files); grpcErr != nil {
+	if grpcErr := h.fileClient.Upload(ctx, id, in.Files); grpcErr != nil {
 		respond.Error(w, http.StatusBadRequest, grpcErr.Message())
 		return
 	}
@@ -119,6 +107,14 @@ func (h *HTTPHandler) Get(w http.ResponseWriter, r *http.Request) {
 		respond.Error(w, http.StatusBadRequest, err.Error())
 		return
 	}
+
+	files, grpcErr := h.fileClient.GetAll(ctx, id)
+	if grpcErr != nil {
+		respond.Error(w, http.StatusBadRequest, grpcErr.Message())
+		return
+	}
+
+	note.Files = files
 
 	respond.JSON(w, http.StatusOK, note)
 }

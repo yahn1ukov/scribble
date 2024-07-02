@@ -21,7 +21,12 @@ type Config struct {
 
 	Storage struct {
 		MinIO struct {
-			Bucket string `yaml:"bucket"`
+			AccessKey string `yaml:"accessKey"`
+			SecretKey string `yaml:"secretKey"`
+			Endpoint  string `yaml:"endpoint"`
+			Bucket    string `yaml:"bucket"`
+			Region    string `yaml:"region"`
+			UseSSL    bool   `yaml:"useSSL"`
 		} `yaml:"minio"`
 	} `yaml:"storage"`
 }

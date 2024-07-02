@@ -3,11 +3,11 @@ package ports
 import (
 	"context"
 
-	"github.com/yahn1ukov/scribble/services/file/internal/core/domain"
+	pb "github.com/yahn1ukov/scribble/libs/grpc/file"
 	"github.com/yahn1ukov/scribble/services/file/internal/core/dto"
 )
 
 type Service interface {
-	Create(context.Context, *dto.CreateInput) error
-	GetAll(context.Context, string) ([]*domain.File, error)
+	Upload(context.Context, *dto.UploadInput) error
+	GetAll(context.Context, string) ([]*pb.File, error)
 }

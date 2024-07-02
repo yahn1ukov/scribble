@@ -5,7 +5,6 @@ import (
 
 	filepb "github.com/yahn1ukov/scribble/libs/grpc/file"
 	notebookpb "github.com/yahn1ukov/scribble/libs/grpc/notebook"
-	storagepb "github.com/yahn1ukov/scribble/libs/grpc/storage"
 	"github.com/yahn1ukov/scribble/services/note/internal/config"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -21,20 +20,6 @@ func NewNotebookGRPC(cfg *config.Config) (notebookpb.NotebookServiceClient, erro
 	}
 
 	client := notebookpb.NewNotebookServiceClient(connection)
-
-	return client, nil
-}
-
-func NewStorageGRPC(cfg *config.Config) (storagepb.StorageServiceClient, error) {
-	connection, err := grpc.NewClient(
-		fmt.Sprintf("%s:%d", cfg.GRPC.Storage.Host, cfg.GRPC.Storage.Port),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	client := storagepb.NewStorageServiceClient(connection)
 
 	return client, nil
 }

@@ -16,19 +16,16 @@ message File {
     google.protobuf.Timestamp created_at = 6;
 }
 
-message Metadata {
-    string name = 1;
-    int64 size = 2;
-    string content_type = 3;
-}
-
 message Files {
     repeated File files = 1;
 }
 
-message CreateFileRequest {
-    string note_id = 1;
-    repeated Metadata files = 2;
+message UploadFileRequest {
+    string name = 1;
+    int64 size = 2;
+    string content_type = 3;
+    string note_id = 4;
+    bytes content = 5;
 }
 
 message GetAllFileRequest {
@@ -36,6 +33,6 @@ message GetAllFileRequest {
 }
 
 service FileService {
-    rpc Create(CreateFileRequest) returns (google.protobuf.Empty);
+    rpc Upload(stream UploadFileRequest) returns (google.protobuf.Empty);
     rpc GetAll(GetAllFileRequest) returns (Files);
 }

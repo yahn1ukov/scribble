@@ -1,7 +1,9 @@
 package adapters
 
 import (
+	"bytes"
 	"context"
+	"io"
 
 	pb "github.com/yahn1ukov/scribble/libs/grpc/file"
 	"github.com/yahn1ukov/scribble/services/file/internal/core/dto"
@@ -9,7 +11,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type GRPCServer struct {
@@ -24,21 +25,32 @@ func NewGRPCServer(service ports.Service) *GRPCServer {
 	}
 }
 
-func (s *GRPCServer) Create(ctx context.Context, req *pb.CreateFileRequest) (*emptypb.Empty, error) {
-	for _, file := range req.Files {
-		if err := s.service.Create(ctx,
-			&dto.CreateInput{
-				Name:        file.Name,
-				Size:        file.Size,
-				ContentType: file.ContentType,
-				NoteID:      req.NoteId,
-			},
-		); err != nil {
-			return nil, status.Errorf(codes.Internal, err.Error())
+func (s *GRPCServer) Upload(stream pb.FileService_UploadServer) error {
+	for {
+		ctx := stream.Context()
+
+		req, err := stream.Recv()
+		if err == io.EOF {
+			return stream.SendAndClose(&emptypb.Empty{})
+		}
+		if err != nil {
+			return status.Error(codes.Internal, err.Error())
+		}
+
+		content := bytes.NewReader(req.Content)
+
+		in := &dto.UploadInput{
+			Name:        req.Name,
+			Size:        req.Size,
+			ContentType: req.ContentType,
+			NoteID:      req.NoteId,
+			Content:     content,
+		}
+
+		if err = s.service.Upload(ctx, in); err != nil {
+			return status.Error(codes.Internal, err.Error())
 		}
 	}
-
-	return &emptypb.Empty{}, nil
 }
 
 func (s *GRPCServer) GetAll(ctx context.Context, req *pb.GetAllFileRequest) (*pb.Files, error) {
@@ -47,22 +59,7 @@ func (s *GRPCServer) GetAll(ctx context.Context, req *pb.GetAllFileRequest) (*pb
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 
-	var filesPb []*pb.File
-	for _, file := range files {
-		filesPb = append(
-			filesPb,
-			&pb.File{
-				Id:          file.ID,
-				Name:        file.Name,
-				Size:        file.Size,
-				ContentType: file.ContentType,
-				Url:         file.URL,
-				CreatedAt:   timestamppb.New(file.CreatedAt),
-			},
-		)
-	}
-
 	return &pb.Files{
-		Files: filesPb,
+		Files: files,
 	}, nil
 }
