@@ -28,7 +28,6 @@ type GetOutput struct {
 }
 
 type UpdateInput struct {
-	Title string                  `form:"title"`
-	Body  string                  `form:"body"`
-	Files []*multipart.FileHeader `form:"files"`
+	Title string `json:"title"`
+	Body  string `json:"body"`
 }

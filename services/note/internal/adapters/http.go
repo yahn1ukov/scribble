@@ -1,6 +1,7 @@
 package adapters
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 
@@ -124,15 +125,11 @@ func (h *HTTPHandler) Update(w http.ResponseWriter, r *http.Request) {
 	notebookId := r.PathValue("notebookId")
 	id := r.PathValue("noteId")
 
-	if err := r.ParseMultipartForm(1 << 20); err != nil {
+	var in dto.UpdateInput
+	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
 		respond.Error(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-
-	var in dto.UpdateInput
-	in.Title = r.FormValue("title")
-	in.Body = r.FormValue("body")
-	in.Files = r.MultipartForm.File["files"]
 
 	if grpcErr := h.notebookClient.Exists(ctx, notebookId); grpcErr != nil {
 		if grpcErr.Code() == codes.NotFound {
