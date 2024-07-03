@@ -1,6 +1,11 @@
 package config
 
 type Config struct {
+	HTTP struct {
+		Host string `yaml:"host"`
+		Port int    `yaml:"port"`
+	} `yaml:"http"`
+
 	GRPC struct {
 		Network string `yaml:"network"`
 		Host    string `yaml:"host"`

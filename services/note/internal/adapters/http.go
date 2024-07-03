@@ -54,7 +54,7 @@ func (h *HTTPHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if grpcErr := h.fileClient.Upload(ctx, id, in.Files); grpcErr != nil {
+	if grpcErr := h.fileClient.UploadAll(ctx, id, in.Files); grpcErr != nil {
 		respond.Error(w, http.StatusBadRequest, grpcErr.Message())
 		return
 	}
@@ -175,6 +175,35 @@ func (h *HTTPHandler) Delete(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		respond.Error(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h *HTTPHandler) Upload(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	notebookId := r.PathValue("notebookId")
+	id := r.PathValue("noteId")
+
+	if err := r.ParseMultipartForm(1 << 20); err != nil {
+		respond.Error(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	_, file, _ := r.FormFile("file")
+
+	if grpcErr := h.notebookClient.Exists(ctx, notebookId); grpcErr != nil {
+		if grpcErr.Code() == codes.NotFound {
+			respond.Error(w, http.StatusNotFound, grpcErr.Message())
+			return
+		}
+		respond.Error(w, http.StatusBadRequest, grpcErr.Message())
+		return
+	}
+
+	if grpcErr := h.fileClient.Upload(ctx, id, file); grpcErr != nil {
+		respond.Error(w, http.StatusBadRequest, grpcErr.Message())
 		return
 	}
 

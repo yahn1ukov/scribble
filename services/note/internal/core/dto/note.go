@@ -16,7 +16,6 @@ type File struct {
 	Name        string    `json:"name"`
 	Size        int64     `json:"size"`
 	ContentType string    `json:"content_type"`
-	URL         string    `json:"url"`
 	CreatedAt   time.Time `json:"created_at"`
 }
 

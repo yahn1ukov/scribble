@@ -1,6 +1,7 @@
 package services
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 
@@ -36,7 +37,9 @@ func (s *service) Upload(ctx context.Context, in *dto.UploadInput) error {
 		NoteID:      in.NoteID,
 	}
 
-	if _, err := s.minioClient.PutObject(ctx, s.cfg.Storage.MinIO.Bucket, file.URL, in.Content, file.Size,
+	content := bytes.NewReader(in.Content)
+
+	if _, err := s.minioClient.PutObject(ctx, s.cfg.Storage.MinIO.Bucket, file.URL, content, file.Size,
 		minio.PutObjectOptions{
 			ContentType: file.ContentType,
 		},
@@ -62,11 +65,43 @@ func (s *service) GetAll(ctx context.Context, noteId string) ([]*pb.File, error)
 				Name:        file.Name,
 				Size:        file.Size,
 				ContentType: file.ContentType,
-				Url:         file.URL,
 				CreatedAt:   timestamppb.New(file.CreatedAt),
 			},
 		)
 	}
 
 	return out, nil
+}
+
+func (s *service) Get(ctx context.Context, id string) (*dto.GetOutput, error) {
+	file, err := s.repository.Get(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	content, err := s.minioClient.GetObject(ctx, s.cfg.Storage.MinIO.Bucket, file.URL, minio.GetObjectOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	out := &dto.GetOutput{
+		Name:        file.Name,
+		ContentType: file.ContentType,
+		Content:     content,
+	}
+
+	return out, nil
+}
+
+func (s *service) Delete(ctx context.Context, id string) error {
+	file, err := s.repository.Get(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if err = s.minioClient.RemoveObject(ctx, s.cfg.Storage.MinIO.Bucket, file.URL, minio.RemoveObjectOptions{}); err != nil {
+		return err
+	}
+
+	return s.repository.Delete(ctx, id)
 }

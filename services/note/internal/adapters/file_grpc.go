@@ -21,8 +21,35 @@ func NewFileGRPCClient(client filepb.FileServiceClient) *FileGRPCClient {
 	}
 }
 
-func (c *FileGRPCClient) Upload(ctx context.Context, noteId string, files []*multipart.FileHeader) *grpc.Error {
-	stream, err := c.client.Upload(ctx)
+func (c *FileGRPCClient) Upload(ctx context.Context, noteId string, file *multipart.FileHeader) *grpc.Error {
+	f, err := file.Open()
+	if err != nil {
+		return grpc.CreateError(codes.Internal, err.Error())
+	}
+	defer f.Close()
+
+	content, err := io.ReadAll(f)
+	if err != nil {
+		return grpc.CreateError(codes.Internal, err.Error())
+	}
+
+	if _, err := c.client.Upload(ctx,
+		&filepb.UploadFileRequest{
+			Name:        file.Filename,
+			Size:        file.Size,
+			ContentType: file.Header.Get("Content-Type"),
+			NoteId:      noteId,
+			Content:     content,
+		},
+	); err != nil {
+		return grpc.ParseError(err)
+	}
+
+	return nil
+}
+
+func (c *FileGRPCClient) UploadAll(ctx context.Context, noteId string, files []*multipart.FileHeader) *grpc.Error {
+	stream, err := c.client.UploadAll(ctx)
 	if err != nil {
 		return grpc.ParseError(err)
 	}
@@ -82,7 +109,6 @@ func (c *FileGRPCClient) GetAll(ctx context.Context, noteId string) ([]*dto.File
 				Name:        file.Name,
 				Size:        file.Size,
 				ContentType: file.ContentType,
-				URL:         file.Url,
 				CreatedAt:   file.CreatedAt.AsTime(),
 			},
 		)

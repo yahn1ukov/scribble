@@ -12,8 +12,7 @@ message File {
     string name = 2;
     int64 size = 3;
     string content_type = 4;
-    string url = 5;
-    google.protobuf.Timestamp created_at = 6;
+    google.protobuf.Timestamp created_at = 5;
 }
 
 message Files {
@@ -33,6 +32,7 @@ message GetAllFileRequest {
 }
 
 service FileService {
-    rpc Upload(stream UploadFileRequest) returns (google.protobuf.Empty);
+    rpc Upload(UploadFileRequest) returns (google.protobuf.Empty);
+    rpc UploadAll(stream UploadFileRequest) returns (google.protobuf.Empty);
     rpc GetAll(GetAllFileRequest) returns (Files);
 }

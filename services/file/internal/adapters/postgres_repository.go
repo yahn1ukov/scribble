@@ -3,6 +3,7 @@ package adapters
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/yahn1ukov/scribble/services/file/internal/core/domain"
 	"github.com/yahn1ukov/scribble/services/file/internal/core/ports"
@@ -29,7 +30,7 @@ func (r *postgresRepository) Create(ctx context.Context, file *domain.File) erro
 }
 
 func (r *postgresRepository) GetAll(ctx context.Context, noteId string) ([]*domain.File, error) {
-	query := "SELECT id, name, size, content_type, url, created_at FROM files WHERE note_id = $1"
+	query := "SELECT id, name, size, content_type, created_at FROM files WHERE note_id = $1"
 
 	rows, err := r.db.QueryContext(ctx, query, noteId)
 	if err != nil {
@@ -40,7 +41,7 @@ func (r *postgresRepository) GetAll(ctx context.Context, noteId string) ([]*doma
 	var files []*domain.File
 	for rows.Next() {
 		var file domain.File
-		if err := rows.Scan(&file.ID, &file.Name, &file.Size, &file.ContentType, &file.URL, &file.CreatedAt); err != nil {
+		if err := rows.Scan(&file.ID, &file.Name, &file.Size, &file.ContentType, &file.CreatedAt); err != nil {
 			return nil, err
 		}
 		files = append(files, &file)
@@ -51,4 +52,40 @@ func (r *postgresRepository) GetAll(ctx context.Context, noteId string) ([]*doma
 	}
 
 	return files, nil
+}
+
+func (r *postgresRepository) Get(ctx context.Context, id string) (*domain.File, error) {
+	query := "SELECT name, content_type, url FROM files WHERE id = $1 LIMIT 1"
+
+	var file domain.File
+	if err := r.db.
+		QueryRowContext(ctx, query, id).
+		Scan(&file.Name, &file.ContentType, &file.URL); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, domain.ErrNotFound
+		}
+		return nil, err
+	}
+
+	return &file, nil
+}
+
+func (r *postgresRepository) Delete(ctx context.Context, id string) error {
+	query := "DELETE FROM files WHERE id = $1"
+
+	result, err := r.db.ExecContext(ctx, query, id)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return domain.ErrNotFound
+	}
+
+	return nil
 }

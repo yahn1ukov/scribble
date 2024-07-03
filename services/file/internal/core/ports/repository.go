@@ -9,4 +9,6 @@ import (
 type Repository interface {
 	Create(context.Context, *domain.File) error
 	GetAll(context.Context, string) ([]*domain.File, error)
+	Get(context.Context, string) (*domain.File, error)
+	Delete(context.Context, string) error
 }

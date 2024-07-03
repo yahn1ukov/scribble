@@ -10,4 +10,6 @@ import (
 type Service interface {
 	Upload(context.Context, *dto.UploadInput) error
 	GetAll(context.Context, string) ([]*pb.File, error)
+	Get(context.Context, string) (*dto.GetOutput, error)
+	Delete(context.Context, string) error
 }

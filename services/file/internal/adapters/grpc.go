@@ -1,7 +1,6 @@
 package adapters
 
 import (
-	"bytes"
 	"context"
 	"io"
 
@@ -25,7 +24,23 @@ func NewGRPCServer(service ports.Service) *GRPCServer {
 	}
 }
 
-func (s *GRPCServer) Upload(stream pb.FileService_UploadServer) error {
+func (s *GRPCServer) Upload(ctx context.Context, req *pb.UploadFileRequest) (*emptypb.Empty, error) {
+	in := &dto.UploadInput{
+		Name:        req.Name,
+		Size:        req.Size,
+		ContentType: req.ContentType,
+		NoteID:      req.NoteId,
+		Content:     req.Content,
+	}
+
+	if err := s.service.Upload(ctx, in); err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &emptypb.Empty{}, nil
+}
+
+func (s *GRPCServer) UploadAll(stream pb.FileService_UploadAllServer) error {
 	for {
 		ctx := stream.Context()
 
@@ -37,14 +52,12 @@ func (s *GRPCServer) Upload(stream pb.FileService_UploadServer) error {
 			return status.Error(codes.Internal, err.Error())
 		}
 
-		content := bytes.NewReader(req.Content)
-
 		in := &dto.UploadInput{
 			Name:        req.Name,
 			Size:        req.Size,
 			ContentType: req.ContentType,
 			NoteID:      req.NoteId,
-			Content:     content,
+			Content:     req.Content,
 		}
 
 		if err = s.service.Upload(ctx, in); err != nil {
