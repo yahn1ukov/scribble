@@ -1,27 +1,34 @@
 package grpc
 
 import (
+	"errors"
+	"fmt"
+
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
+var (
+	errParse = errors.New("grpc parsing error")
+)
+
 type Error struct {
-	code    codes.Code
-	message string
+	code codes.Code
+	err  error
 }
 
 func (e *Error) Code() codes.Code {
 	return e.code
 }
 
-func (e *Error) Message() string {
-	return e.message
+func (e *Error) Error() error {
+	return e.err
 }
 
-func CreateError(code codes.Code, message string) *Error {
+func CreateError(code codes.Code, err error) *Error {
 	return &Error{
-		code:    code,
-		message: message,
+		code: code,
+		err:  err,
 	}
 }
 
@@ -29,13 +36,13 @@ func ParseError(err error) *Error {
 	status, ok := status.FromError(err)
 	if !ok {
 		return &Error{
-			code:    codes.Internal,
-			message: "grpc parsing error",
+			code: codes.Internal,
+			err:  errParse,
 		}
 	}
 
 	return &Error{
-		code:    status.Code(),
-		message: status.Message(),
+		code: status.Code(),
+		err:  fmt.Errorf("%s", status.Message()),
 	}
 }

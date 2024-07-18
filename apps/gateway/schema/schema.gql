@@ -1,0 +1,7 @@
+type Query
+type Mutation
+
+scalar UUID
+scalar Time
+scalar Upload
+scalar Int64

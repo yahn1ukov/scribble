@@ -5,11 +5,34 @@ package notebook;
 option go_package = "github.com/yahn1ukov/scribble/libs/grpc/notebook";
 
 import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
 
-message ExistsNotebookRequest {
+message Notebook {
+    string id = 1;
+    string title = 2;
+    google.protobuf.Timestamp created_at = 3;
+}
+
+message Notebooks {
+    repeated Notebook notebooks = 1;
+}
+
+message CreateNotebookRequest {
+    string title = 1;
+}
+
+message UpdateNotebookRequest {
+    string id = 1;
+    string title = 2;
+}
+
+message DeleteNotebookRequest {
     string id = 1;
 }
 
 service NotebookService {
-    rpc Exists(ExistsNotebookRequest) returns (google.protobuf.Empty);
+    rpc CreateNotebook(CreateNotebookRequest) returns (google.protobuf.Empty);
+    rpc GetAllNotebooks(google.protobuf.Empty) returns (Notebooks);
+    rpc UpdateNotebook(UpdateNotebookRequest) returns (google.protobuf.Empty);
+    rpc DeleteNotebook(DeleteNotebookRequest) returns (google.protobuf.Empty);
 }

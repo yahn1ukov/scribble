@@ -1,0 +1,23 @@
+extend type Query {
+    notebooks: [Notebook!]!
+}
+
+extend type Mutation {
+    createNotebook(input: CreateNotebookInput!): Boolean!
+    updateNotebook(id: UUID!, input: UpdateNotebookInput!): Boolean!
+    deleteNotebook(id: UUID!): Boolean!
+}
+
+type Notebook {
+    id: UUID!
+    title: String!
+    createdAt: Time!
+}
+
+input CreateNotebookInput {
+    title: String!
+}
+
+input UpdateNotebookInput {
+    title: String!
+}

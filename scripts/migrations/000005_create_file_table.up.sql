@@ -1,8 +1,0 @@
-CREATE TABLE IF NOT EXISTS files (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    size INT NOT NULL,
-    content_type VARCHAR(255) NOT NULL,
-    url VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);

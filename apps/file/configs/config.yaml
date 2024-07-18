@@ -1,0 +1,15 @@
+grpc:
+  server:
+    network: tcp
+    address: localhost:50052
+db:
+  postgres:
+    url: postgres://scribble:scribble@localhost:5432/scribble?sslmode=disable
+storage:
+  minio:
+    accessKey: scribble
+    secretKey: scribble123
+    endpoint: localhost:9000
+    bucket: scribble
+    region: eu-west-1
+    useSSL: false

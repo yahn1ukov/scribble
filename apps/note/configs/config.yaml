@@ -1,0 +1,7 @@
+grpc:
+  server:
+    network: tcp
+    address: localhost:50051
+db:
+  postgres:
+    url: postgres://scribble:scribble@localhost:5432/scribble?sslmode=disable

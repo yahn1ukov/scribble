@@ -27,12 +27,30 @@ message UploadFileRequest {
     bytes content = 5;
 }
 
-message GetAllFileRequest {
+message GetAllFilesRequest {
     string note_id = 1;
 }
 
+message DownloadFileRequest {
+    string id = 1;
+    string note_id = 2;
+}
+
+message DownloadFileResponse {
+    string name = 1;
+    string content_type = 2;
+    bytes content = 3;
+}
+
+message RemoveFileRequest {
+    string id = 1;
+    string note_id = 2;
+}
+
 service FileService {
-    rpc Upload(UploadFileRequest) returns (google.protobuf.Empty);
-    rpc UploadAll(stream UploadFileRequest) returns (google.protobuf.Empty);
-    rpc GetAll(GetAllFileRequest) returns (Files);
+    rpc GetAllFiles(GetAllFilesRequest) returns (Files);
+    rpc UploadFile(UploadFileRequest) returns (google.protobuf.Empty);
+    rpc UploadAllFiles(stream UploadFileRequest) returns (google.protobuf.Empty);
+    rpc DownloadFile(DownloadFileRequest) returns (DownloadFileResponse);
+    rpc RemoveFile(RemoveFileRequest) returns (google.protobuf.Empty);
 }
