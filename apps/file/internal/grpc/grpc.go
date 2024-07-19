@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"fmt"
 	"net"
 
 	"github.com/yahn1ukov/scribble/apps/file/internal/config"
@@ -10,28 +11,23 @@ import (
 	"google.golang.org/grpc"
 )
 
-type Params struct {
-	fx.In
+func Run(lc fx.Lifecycle, cfg *config.Config, server *server) {
+	listener, _ := net.Listen(
+		cfg.GRPC.Server.Network,
+		fmt.Sprintf("%s:%d", cfg.GRPC.Server.Host, cfg.GRPC.Server.Port),
+	)
 
-	Lc     fx.Lifecycle
-	Cfg    *config.Config
-	Server *server
-}
+	svr := grpc.NewServer()
 
-func Run(p Params) {
-	listener, _ := net.Listen(p.Cfg.GRPC.Server.Network, p.Cfg.GRPC.Server.Address)
+	pb.RegisterFileServiceServer(svr, server)
 
-	server := grpc.NewServer()
-
-	pb.RegisterFileServiceServer(server, p.Server)
-
-	p.Lc.Append(fx.Hook{
+	lc.Append(fx.Hook{
 		OnStart: func(_ context.Context) error {
-			go server.Serve(listener)
+			go svr.Serve(listener)
 			return nil
 		},
 		OnStop: func(_ context.Context) error {
-			server.GracefulStop()
+			svr.GracefulStop()
 			return nil
 		},
 	})

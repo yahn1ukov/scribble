@@ -26,11 +26,11 @@ func NewServer(service services.Service) *server {
 }
 
 func (s *server) CreateNotebook(ctx context.Context, req *pb.CreateNotebookRequest) (*emptypb.Empty, error) {
-	if err := s.service.Create(ctx,
-		&dto.CreateInput{
-			Title: req.Title,
-		},
-	); err != nil {
+	input := &dto.CreateInput{
+		Title: req.Title,
+	}
+
+	if err := s.service.Create(ctx, input); err != nil {
 		if errors.Is(err, repositories.ErrAlreadyExists) {
 			return nil, status.Error(codes.AlreadyExists, err.Error())
 		}
@@ -52,11 +52,11 @@ func (s *server) GetAllNotebooks(ctx context.Context, _ *emptypb.Empty) (*pb.Not
 }
 
 func (s *server) UpdateNotebook(ctx context.Context, req *pb.UpdateNotebookRequest) (*emptypb.Empty, error) {
-	if err := s.service.Update(ctx, req.Id,
-		&dto.UpdateInput{
-			Title: req.Title,
-		},
-	); err != nil {
+	input := &dto.UpdateInput{
+		Title: req.Title,
+	}
+
+	if err := s.service.Update(ctx, req.Id, input); err != nil {
 		if errors.Is(err, repositories.ErrNotFound) {
 			return nil, status.Error(codes.NotFound, err.Error())
 		}

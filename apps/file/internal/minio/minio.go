@@ -9,35 +9,27 @@ import (
 	"go.uber.org/fx"
 )
 
-type Params struct {
-	fx.In
-
-	Lc     fx.Lifecycle
-	Cfg    *config.Config
-	Client *minio.Client
-}
-
-func New(p Params) (*minio.Client, error) {
+func New(cfg *config.Config) (*minio.Client, error) {
 	return minio.New(
-		p.Cfg.Storage.MinIO.Endpoint,
+		cfg.Storage.MinIO.Endpoint,
 		&minio.Options{
-			Creds:  credentials.NewStaticV4(p.Cfg.Storage.MinIO.AccessKey, p.Cfg.Storage.MinIO.SecretKey, ""),
-			Secure: p.Cfg.Storage.MinIO.UseSSL,
+			Creds:  credentials.NewStaticV4(cfg.Storage.MinIO.AccessKey, cfg.Storage.MinIO.SecretKey, ""),
+			Secure: cfg.Storage.MinIO.UseSSL,
 		},
 	)
 }
 
-func Run(p Params) {
-	p.Lc.Append(fx.Hook{
+func Run(lc fx.Lifecycle, cfg *config.Config, client *minio.Client) {
+	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			if err := p.Client.MakeBucket(
+			if err := client.MakeBucket(
 				ctx,
-				p.Cfg.Storage.MinIO.Bucket,
+				cfg.Storage.MinIO.Bucket,
 				minio.MakeBucketOptions{
-					Region: p.Cfg.Storage.MinIO.Region,
+					Region: cfg.Storage.MinIO.Region,
 				},
 			); err != nil {
-				exists, errBucketExists := p.Client.BucketExists(ctx, p.Cfg.Storage.MinIO.Bucket)
+				exists, errBucketExists := client.BucketExists(ctx, cfg.Storage.MinIO.Bucket)
 				if errBucketExists != nil && !exists {
 					return err
 				}

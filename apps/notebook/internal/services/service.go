@@ -32,11 +32,11 @@ func (s *service) Create(ctx context.Context, input *dto.CreateInput) error {
 		return repositories.ErrTitleRequired
 	}
 
-	return s.repository.Create(ctx,
-		&model.Notebook{
-			Title: input.Title,
-		},
-	)
+	notebook := &model.Notebook{
+		Title: input.Title,
+	}
+
+	return s.repository.Create(ctx, notebook)
 }
 
 func (s *service) GetAll(ctx context.Context) ([]*pb.Notebook, error) {

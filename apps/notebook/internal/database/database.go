@@ -2,19 +2,37 @@ package database
 
 import (
 	"context"
+	"database/sql"
+	"fmt"
 
-	"github.com/jackc/pgx/v5/pgxpool"
-	_ "github.com/jackc/pgx/v5/stdlib"
+	_ "github.com/lib/pq"
 	"github.com/yahn1ukov/scribble/apps/notebook/internal/config"
 	"go.uber.org/fx"
 )
 
-type Params struct {
-	fx.In
-
-	Cfg *config.Config
+func New(cfg *config.Config) (*sql.DB, error) {
+	return sql.Open(
+		cfg.DB.Postgres.Driver,
+		fmt.Sprintf(
+			"%s://%s:%s@%s:%d/%s?sslmode=%s",
+			cfg.DB.Postgres.Driver,
+			cfg.DB.Postgres.User,
+			cfg.DB.Postgres.Password,
+			cfg.DB.Postgres.Host,
+			cfg.DB.Postgres.Port,
+			cfg.DB.Postgres.Name,
+			cfg.DB.Postgres.SSLMode,
+		),
+	)
 }
 
-func New(p Params) (*pgxpool.Pool, error) {
-	return pgxpool.New(context.Background(), p.Cfg.DB.Postgres.URL)
+func Run(lc fx.Lifecycle, db *sql.DB) {
+	lc.Append(fx.Hook{
+		OnStart: func(ctx context.Context) error {
+			return db.PingContext(ctx)
+		},
+		OnStop: func(_ context.Context) error {
+			return db.Close()
+		},
+	})
 }

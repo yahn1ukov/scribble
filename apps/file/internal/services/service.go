@@ -110,11 +110,13 @@ func (s *service) Get(ctx context.Context, id string, noteID string) (*pb.Downlo
 		return nil, err
 	}
 
-	return &pb.DownloadFileResponse{
+	output := &pb.DownloadFileResponse{
 		Name:        file.Name,
 		ContentType: file.ContentType,
 		Content:     content,
-	}, nil
+	}
+
+	return output, nil
 }
 
 func (s *service) Remove(ctx context.Context, id string, noteID string) error {

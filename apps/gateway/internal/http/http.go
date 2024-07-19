@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -9,31 +10,24 @@ import (
 	"go.uber.org/fx"
 )
 
-type Params struct {
-	fx.In
-
-	Lc     fx.Lifecycle
-	Cfg    *config.Config
-	Server *handler.Server
-}
-
-func Run(p Params) {
+func Run(lc fx.Lifecycle, cfg *config.Config, server *handler.Server, handler *Handler) {
 	mux := http.NewServeMux()
 
-	mux.Handle("/", p.Server)
+	mux.Handle("/", server)
+	mux.HandleFunc("GET /files/{fileId}/notes/{noteId}", handler.DownloadFile)
 
-	server := &http.Server{
-		Addr:    p.Cfg.HTTP.Address,
+	svr := &http.Server{
+		Addr:    fmt.Sprintf("%s:%d", cfg.HTTP.Host, cfg.HTTP.Port),
 		Handler: mux,
 	}
 
-	p.Lc.Append(fx.Hook{
+	lc.Append(fx.Hook{
 		OnStart: func(_ context.Context) error {
-			go server.ListenAndServe()
+			go svr.ListenAndServe()
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
-			return server.Shutdown(ctx)
+			return svr.Shutdown(ctx)
 		},
 	})
 }

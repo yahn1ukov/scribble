@@ -6,18 +6,11 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/yahn1ukov/scribble/apps/gateway/internal/gql/graph"
 	"github.com/yahn1ukov/scribble/apps/gateway/internal/gql/resolvers"
-	"go.uber.org/fx"
 )
 
-type Params struct {
-	fx.In
-
-	Resolver *resolvers.Resolver
-}
-
-func New(p Params) *handler.Server {
+func New(resolver *resolvers.Resolver) *handler.Server {
 	cfg := graph.Config{
-		Resolvers: p.Resolver,
+		Resolvers: resolver,
 	}
 
 	schema := graph.NewExecutableSchema(cfg)
@@ -27,7 +20,11 @@ func New(p Params) *handler.Server {
 	server.AddTransport(transport.Options{})
 	server.AddTransport(transport.GET{})
 	server.AddTransport(transport.POST{})
-	server.AddTransport(transport.MultipartForm{})
+	server.AddTransport(
+		transport.MultipartForm{
+			MaxUploadSize: 1 << 20,
+		},
+	)
 
 	server.Use(extension.Introspection{})
 

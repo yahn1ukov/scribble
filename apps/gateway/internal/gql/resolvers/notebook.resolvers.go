@@ -14,11 +14,11 @@ import (
 
 // CreateNotebook is the resolver for the createNotebook field.
 func (r *mutationResolver) CreateNotebook(ctx context.Context, input gqlmodels.CreateNotebookInput) (bool, error) {
-	if err := r.grpc.CreateNotebook(ctx,
-		&models.CreateNotebookInput{
-			Title: input.Title,
-		},
-	); err != nil {
+	req := &models.CreateNotebookRequest{
+		Title: input.Title,
+	}
+
+	if err := r.grpc.CreateNotebook(ctx, req); err != nil {
 		return false, err
 	}
 
@@ -27,11 +27,11 @@ func (r *mutationResolver) CreateNotebook(ctx context.Context, input gqlmodels.C
 
 // UpdateNotebook is the resolver for the updateNotebook field.
 func (r *mutationResolver) UpdateNotebook(ctx context.Context, id uuid.UUID, input gqlmodels.UpdateNotebookInput) (bool, error) {
-	if err := r.grpc.UpdateNotebook(ctx, id,
-		&models.UpdateNotebookInput{
-			Title: input.Title,
-		},
-	); err != nil {
+	req := &models.UpdateNotebookRequest{
+		Title: input.Title,
+	}
+
+	if err := r.grpc.UpdateNotebook(ctx, id, req); err != nil {
 		return false, err
 	}
 
@@ -56,7 +56,8 @@ func (r *queryResolver) Notebooks(ctx context.Context) ([]*gqlmodels.Notebook, e
 
 	var output []*gqlmodels.Notebook
 	for _, notebook := range notebooks {
-		output = append(output,
+		output = append(
+			output,
 			&gqlmodels.Notebook{
 				ID:        uuid.MustParse(notebook.Id),
 				Title:     notebook.Title,

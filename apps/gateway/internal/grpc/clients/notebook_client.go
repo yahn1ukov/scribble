@@ -11,11 +11,11 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-func (c *Client) CreateNotebook(ctx context.Context, input *models.CreateNotebookInput) error {
+func (c *Client) CreateNotebook(ctx context.Context, req *models.CreateNotebookRequest) error {
 	if _, err := c.notebook.CreateNotebook(
 		ctx,
 		&notebookpb.CreateNotebookRequest{
-			Title: input.Title,
+			Title: req.Title,
 		},
 	); err != nil {
 		grpcErr := grpc.ParseError(err)
@@ -31,20 +31,20 @@ func (c *Client) CreateNotebook(ctx context.Context, input *models.CreateNoteboo
 }
 
 func (c *Client) GetAllNotebooks(ctx context.Context) ([]*notebookpb.Notebook, error) {
-	notebooks, err := c.notebook.GetAllNotebooks(ctx, &emptypb.Empty{})
+	res, err := c.notebook.GetAllNotebooks(ctx, &emptypb.Empty{})
 	if err != nil {
 		return nil, grpc.ParseError(err).Error()
 	}
 
-	return notebooks.Notebooks, nil
+	return res.Notebooks, nil
 }
 
-func (c *Client) UpdateNotebook(ctx context.Context, id uuid.UUID, input *models.UpdateNotebookInput) error {
+func (c *Client) UpdateNotebook(ctx context.Context, id uuid.UUID, req *models.UpdateNotebookRequest) error {
 	if _, err := c.notebook.UpdateNotebook(
 		ctx,
 		&notebookpb.UpdateNotebookRequest{
 			Id:    id.String(),
-			Title: input.Title,
+			Title: req.Title,
 		},
 	); err != nil {
 		grpcErr := grpc.ParseError(err)

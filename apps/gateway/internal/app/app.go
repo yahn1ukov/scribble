@@ -20,6 +20,7 @@ func New() *fx.App {
 			clients.NewClient,
 			resolvers.NewResolver,
 			gql.New,
+			http.NewHandler,
 		),
 		fx.Invoke(http.Run),
 	)

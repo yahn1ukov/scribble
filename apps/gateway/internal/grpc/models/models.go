@@ -1,19 +1,28 @@
 package models
 
-type CreateNotebookInput struct {
+import "io"
+
+type CreateNotebookRequest struct {
 	Title string
 }
 
-type UpdateNotebookInput struct {
+type UpdateNotebookRequest struct {
 	Title string
 }
 
-type CreateNoteInput struct {
+type CreateNoteRequest struct {
 	Title string
 	Body  string
 }
 
-type UpdateNoteInput struct {
+type UpdateNoteRequest struct {
 	Title string
 	Body  string
+}
+
+type UploadFileRequest struct {
+	Name        string
+	Size        int64
+	ContentType string
+	Content     io.Reader
 }

@@ -18,6 +18,6 @@ func New() *fx.App {
 			fx.Annotate(services.NewService, fx.As(new(services.Service))),
 			grpc.NewServer,
 		),
-		fx.Invoke(grpc.Run),
+		fx.Invoke(database.Run, grpc.Run),
 	)
 }

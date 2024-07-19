@@ -1,5 +1,5 @@
 extend type Mutation {
-    downloadFile(id: UUID!, noteID: UUID!): Boolean!
+    uploadFile(noteID: UUID!, file: Upload!): Boolean!
     removeFile(id: UUID!, noteID: UUID!): Boolean!
 }
 
@@ -9,9 +9,4 @@ type File {
     size: Int64!
     contentType: String!
     createdAt: Time!
-}
-
-type DownloadedFile {
-    name: String!
-    size: Int64!
 }

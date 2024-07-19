@@ -1,6 +1,6 @@
 extend type Query {
     note(id: UUID!, notebookID: UUID!): Note!
-    notes(notebookID: UUID!): [Note!]!
+    notes(notebookID: UUID!): [Note]!
 }
 
 extend type Mutation {
@@ -13,14 +13,14 @@ type Note {
     id: UUID!
     title: String!
     body: String!
-    files: [File!]!
     createdAt: Time!
+    files: [File]!
 }
 
 input CreateNoteInput {
     title: String!
     body: String!
-    files: [Upload!]!
+    files: [Upload]!
 }
 
 input UpdateNoteInput {

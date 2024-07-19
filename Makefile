@@ -7,4 +7,4 @@ migrate-create:
 	migrate create -ext sql -dir ./migrations $(NAME)
 
 migrate-up:
-	migrate -database="$(URL)" -path=./migrations up
+	migrate -database=$(URL) -path=./migrations up

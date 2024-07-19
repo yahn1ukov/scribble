@@ -10,11 +10,12 @@ import (
 	"google.golang.org/grpc/codes"
 )
 
-func (c *Client) CreateNote(ctx context.Context, notebookID uuid.UUID, input *models.CreateNoteInput) (uuid.UUID, error) {
-	res, err := c.note.CreateNote(ctx,
+func (c *Client) CreateNote(ctx context.Context, notebookID uuid.UUID, req *models.CreateNoteRequest) (uuid.UUID, error) {
+	res, err := c.note.CreateNote(
+		ctx,
 		&notepb.CreateNoteRequest{
-			Title:      input.Title,
-			Body:       input.Body,
+			Title:      req.Title,
+			Body:       req.Body,
 			NotebookId: notebookID.String(),
 		},
 	)
@@ -26,7 +27,8 @@ func (c *Client) CreateNote(ctx context.Context, notebookID uuid.UUID, input *mo
 }
 
 func (c *Client) GetAllNotes(ctx context.Context, notebookID uuid.UUID) ([]*notepb.Note, error) {
-	res, err := c.note.GetAllNotes(ctx,
+	res, err := c.note.GetAllNotes(
+		ctx,
 		&notepb.GetAllNotesRequest{
 			NotebookId: notebookID.String(),
 		},
@@ -39,7 +41,8 @@ func (c *Client) GetAllNotes(ctx context.Context, notebookID uuid.UUID) ([]*note
 }
 
 func (c *Client) GetNote(ctx context.Context, id uuid.UUID, notebookID uuid.UUID) (*notepb.Note, error) {
-	res, err := c.note.GetNote(ctx,
+	res, err := c.note.GetNote(
+		ctx,
 		&notepb.GetNoteRequest{
 			Id:         id.String(),
 			NotebookId: notebookID.String(),
@@ -52,12 +55,13 @@ func (c *Client) GetNote(ctx context.Context, id uuid.UUID, notebookID uuid.UUID
 	return res, nil
 }
 
-func (c *Client) UpdateNote(ctx context.Context, id uuid.UUID, notebookID uuid.UUID, input *models.UpdateNoteInput) error {
-	if _, err := c.note.UpdateNote(ctx,
+func (c *Client) UpdateNote(ctx context.Context, id uuid.UUID, notebookID uuid.UUID, req *models.UpdateNoteRequest) error {
+	if _, err := c.note.UpdateNote(
+		ctx,
 		&notepb.UpdateNoteRequest{
 			Id:         id.String(),
-			Title:      input.Title,
-			Body:       input.Body,
+			Title:      req.Title,
+			Body:       req.Body,
 			NotebookId: notebookID.String(),
 		},
 	); err != nil {
@@ -74,7 +78,8 @@ func (c *Client) UpdateNote(ctx context.Context, id uuid.UUID, notebookID uuid.U
 }
 
 func (c *Client) DeleteNote(ctx context.Context, id uuid.UUID, notebookID uuid.UUID) error {
-	if _, err := c.note.DeleteNote(ctx,
+	if _, err := c.note.DeleteNote(
+		ctx,
 		&notepb.DeleteNoteRequest{
 			Id:         id.String(),
 			NotebookId: notebookID.String(),

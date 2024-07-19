@@ -2,20 +2,19 @@ package repositories
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/yahn1ukov/scribble/apps/note/internal/model"
 )
 
 type postgresRepository struct {
-	pool *pgxpool.Pool
+	db *sql.DB
 }
 
-func NewPostgresRepository(pool *pgxpool.Pool) Repository {
+func NewPostgresRepository(db *sql.DB) Repository {
 	return &postgresRepository{
-		pool: pool,
+		db: db,
 	}
 }
 
@@ -23,7 +22,7 @@ func (r *postgresRepository) Create(ctx context.Context, notebookID string, note
 	query := "INSERT INTO notes(title, body, notebook_id) VALUES($1, $2, $3) RETURNING id"
 
 	var id string
-	if err := r.pool.QueryRow(ctx, query, note.Title, note.Body, notebookID).Scan(&id); err != nil {
+	if err := r.db.QueryRowContext(ctx, query, note.Title, note.Body, notebookID).Scan(&id); err != nil {
 		return "", err
 	}
 
@@ -33,7 +32,7 @@ func (r *postgresRepository) Create(ctx context.Context, notebookID string, note
 func (r *postgresRepository) GetAll(ctx context.Context, notebookID string) ([]*model.Note, error) {
 	query := "SELECT id, title, body, created_at FROM notes WHERE notebook_id = $1"
 
-	rows, err := r.pool.Query(ctx, query, notebookID)
+	rows, err := r.db.QueryContext(ctx, query, notebookID)
 	if err != nil {
 		return nil, err
 	}
@@ -59,8 +58,8 @@ func (r *postgresRepository) Get(ctx context.Context, id string, notebookID stri
 	query := "SELECT id, title, body, created_at FROM notes WHERE id = $1 AND notebook_id = $2 LIMIT 1"
 
 	var note model.Note
-	if err := r.pool.QueryRow(ctx, query, id, notebookID).Scan(&note.ID, &note.Title, &note.Body, &note.CreatedAt); err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+	if err := r.db.QueryRowContext(ctx, query, id, notebookID).Scan(&note.ID, &note.Title, &note.Body, &note.CreatedAt); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrNotFound
 		}
 		return nil, err
@@ -72,12 +71,17 @@ func (r *postgresRepository) Get(ctx context.Context, id string, notebookID stri
 func (r *postgresRepository) Update(ctx context.Context, id string, notebookID string, note *model.Note) error {
 	query := "UPDATE notes SET title = $1, body = $2 WHERE id = $3 AND notebook_id = $4"
 
-	result, err := r.pool.Exec(ctx, query, note.Title, note.Body, id, notebookID)
+	result, err := r.db.ExecContext(ctx, query, note.Title, note.Body, id, notebookID)
 	if err != nil {
 		return err
 	}
 
-	if result.RowsAffected() == 0 {
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
 		return ErrNotFound
 	}
 
@@ -87,12 +91,17 @@ func (r *postgresRepository) Update(ctx context.Context, id string, notebookID s
 func (r *postgresRepository) Delete(ctx context.Context, id string, notebookID string) error {
 	query := "DELETE FROM notes WHERE id = $1 AND notebook_id = $2"
 
-	result, err := r.pool.Exec(ctx, query, id, notebookID)
+	result, err := r.db.ExecContext(ctx, query, id, notebookID)
 	if err != nil {
 		return err
 	}
 
-	if result.RowsAffected() == 0 {
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
 		return ErrNotFound
 	}
 

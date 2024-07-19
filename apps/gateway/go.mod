@@ -2,7 +2,10 @@ module github.com/yahn1ukov/scribble/apps/gateway
 
 go 1.22.5
 
-replace github.com/yahn1ukov/scribble/libs/grpc => ../../libs/grpc
+replace (
+	github.com/yahn1ukov/scribble/libs/grpc => ../../libs/grpc
+	github.com/yahn1ukov/scribble/libs/respond => ../../libs/respond
+)
 
 require (
 	github.com/99designs/gqlgen v0.17.49
@@ -10,6 +13,7 @@ require (
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/vektah/gqlparser/v2 v2.5.16
 	github.com/yahn1ukov/scribble/libs/grpc v0.0.0-00010101000000-000000000000
+	github.com/yahn1ukov/scribble/libs/respond v0.0.0-00010101000000-000000000000
 	go.uber.org/fx v1.22.1
 	google.golang.org/grpc v1.65.0
 	google.golang.org/protobuf v1.34.2

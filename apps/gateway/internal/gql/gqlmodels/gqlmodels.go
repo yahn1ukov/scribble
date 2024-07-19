@@ -19,11 +19,6 @@ type CreateNotebookInput struct {
 	Title string `json:"title"`
 }
 
-type DownloadedFile struct {
-	Name string `json:"name"`
-	Size int64  `json:"size"`
-}
-
 type File struct {
 	ID          uuid.UUID `json:"id"`
 	Name        string    `json:"name"`
@@ -39,8 +34,8 @@ type Note struct {
 	ID        uuid.UUID `json:"id"`
 	Title     string    `json:"title"`
 	Body      string    `json:"body"`
-	Files     []*File   `json:"files"`
 	CreatedAt time.Time `json:"createdAt"`
+	Files     []*File   `json:"files"`
 }
 
 type Notebook struct {

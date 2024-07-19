@@ -27,14 +27,14 @@ func NewServer(service services.Service) *server {
 }
 
 func (s *server) UploadFile(ctx context.Context, req *pb.UploadFileRequest) (*emptypb.Empty, error) {
-	if err := s.service.Upload(ctx, req.NoteId,
-		&dto.UploadInput{
-			Name:        req.Name,
-			Size:        req.Size,
-			ContentType: req.ContentType,
-			Content:     req.Content,
-		},
-	); err != nil {
+	input := &dto.UploadInput{
+		Name:        req.Name,
+		Size:        req.Size,
+		ContentType: req.ContentType,
+		Content:     req.Content,
+	}
+
+	if err := s.service.Upload(ctx, req.NoteId, input); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
@@ -53,14 +53,14 @@ func (s *server) UploadAllFiles(stream pb.FileService_UploadAllFilesServer) erro
 			return status.Error(codes.Internal, err.Error())
 		}
 
-		if err = s.service.Upload(ctx, req.NoteId,
-			&dto.UploadInput{
-				Name:        req.Name,
-				Size:        req.Size,
-				ContentType: req.ContentType,
-				Content:     req.Content,
-			},
-		); err != nil {
+		input := &dto.UploadInput{
+			Name:        req.Name,
+			Size:        req.Size,
+			ContentType: req.ContentType,
+			Content:     req.Content,
+		}
+
+		if err = s.service.Upload(ctx, req.NoteId, input); err != nil {
 			return status.Error(codes.Internal, err.Error())
 		}
 	}

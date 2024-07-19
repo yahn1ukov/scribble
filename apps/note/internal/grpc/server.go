@@ -26,12 +26,12 @@ func NewServer(service services.Service) *server {
 }
 
 func (s *server) CreateNote(ctx context.Context, req *pb.CreateNoteRequest) (*pb.CreateNoteResponse, error) {
-	id, err := s.service.Create(ctx, req.NotebookId,
-		&dto.CreateInput{
-			Title: req.Title,
-			Body:  req.Body,
-		},
-	)
+	input := &dto.CreateInput{
+		Title: req.Title,
+		Body:  req.Body,
+	}
+
+	id, err := s.service.Create(ctx, req.NotebookId, input)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -65,12 +65,12 @@ func (h *server) GetNote(ctx context.Context, req *pb.GetNoteRequest) (*pb.Note,
 }
 
 func (h *server) UpdateNote(ctx context.Context, req *pb.UpdateNoteRequest) (*emptypb.Empty, error) {
-	if err := h.service.Update(ctx, req.Id, req.NotebookId,
-		&dto.UpdateInput{
-			Title: req.Title,
-			Body:  req.Body,
-		},
-	); err != nil {
+	input := &dto.UpdateInput{
+		Title: req.Title,
+		Body:  req.Body,
+	}
+
+	if err := h.service.Update(ctx, req.Id, req.NotebookId, input); err != nil {
 		if errors.Is(err, repositories.ErrNotFound) {
 			return nil, status.Error(codes.NotFound, err.Error())
 		}

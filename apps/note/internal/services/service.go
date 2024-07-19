@@ -33,12 +33,12 @@ func (s *service) Create(ctx context.Context, notebookID string, input *dto.Crea
 		return "", repositories.ErrTitleRequired
 	}
 
-	return s.repository.Create(ctx, notebookID,
-		&model.Note{
-			Title: input.Title,
-			Body:  input.Body,
-		},
-	)
+	note := &model.Note{
+		Title: input.Title,
+		Body:  input.Body,
+	}
+
+	return s.repository.Create(ctx, notebookID, note)
 }
 
 func (s *service) GetAll(ctx context.Context, notebookID string) ([]*pb.Note, error) {
@@ -68,12 +68,14 @@ func (s *service) Get(ctx context.Context, id string, notebookID string) (*pb.No
 		return nil, err
 	}
 
-	return &pb.Note{
+	output := &pb.Note{
 		Id:        note.ID,
 		Title:     note.Title,
 		Body:      note.Body,
 		CreatedAt: timestamppb.New(note.CreatedAt),
-	}, nil
+	}
+
+	return output, nil
 }
 
 func (s *service) Update(ctx context.Context, id string, notebookID string, input *dto.UpdateInput) error {

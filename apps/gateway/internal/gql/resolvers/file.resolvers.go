@@ -6,17 +6,33 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/google/uuid"
+	"github.com/yahn1ukov/scribble/apps/gateway/internal/grpc/models"
 )
 
-// DownloadFile is the resolver for the downloadFile field.
-func (r *mutationResolver) DownloadFile(ctx context.Context, id uuid.UUID, noteID uuid.UUID) (bool, error) {
-	panic(fmt.Errorf("not implemented: DownloadFile - downloadFile"))
+// UploadFile is the resolver for the uploadFile field.
+func (r *mutationResolver) UploadFile(ctx context.Context, noteID uuid.UUID, file graphql.Upload) (bool, error) {
+	req := &models.UploadFileRequest{
+		Name:        file.Filename,
+		Size:        file.Size,
+		ContentType: file.ContentType,
+		Content:     file.File,
+	}
+
+	if err := r.grpc.UploadFile(ctx, noteID, req); err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
 
 // RemoveFile is the resolver for the removeFile field.
 func (r *mutationResolver) RemoveFile(ctx context.Context, id uuid.UUID, noteID uuid.UUID) (bool, error) {
-	panic(fmt.Errorf("not implemented: RemoveFile - removeFile"))
+	if err := r.grpc.RemoveFile(ctx, id, noteID); err != nil {
+		return false, err
+	}
+
+	return true, nil
 }

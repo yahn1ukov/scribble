@@ -14,13 +14,30 @@ import (
 
 // CreateNote is the resolver for the createNote field.
 func (r *mutationResolver) CreateNote(ctx context.Context, notebookID uuid.UUID, input gqlmodels.CreateNoteInput) (bool, error) {
-	_, err := r.grpc.CreateNote(ctx, notebookID,
-		&models.CreateNoteInput{
-			Title: input.Title,
-			Body:  input.Body,
-		},
-	)
+	reqNote := &models.CreateNoteRequest{
+		Title: input.Title,
+		Body:  input.Body,
+	}
+
+	id, err := r.grpc.CreateNote(ctx, notebookID, reqNote)
 	if err != nil {
+		return false, err
+	}
+
+	var reqFiles []*models.UploadFileRequest
+	for _, file := range input.Files {
+		reqFiles = append(
+			reqFiles,
+			&models.UploadFileRequest{
+				Name:        file.Filename,
+				Size:        file.Size,
+				ContentType: file.ContentType,
+				Content:     file.File,
+			},
+		)
+	}
+
+	if err = r.grpc.UploadAllFiles(ctx, id, reqFiles); err != nil {
 		return false, err
 	}
 
@@ -29,12 +46,12 @@ func (r *mutationResolver) CreateNote(ctx context.Context, notebookID uuid.UUID,
 
 // UpdateNote is the resolver for the updateNote field.
 func (r *mutationResolver) UpdateNote(ctx context.Context, id uuid.UUID, notebookID uuid.UUID, input gqlmodels.UpdateNoteInput) (bool, error) {
-	if err := r.grpc.UpdateNote(ctx, id, notebookID,
-		&models.UpdateNoteInput{
-			Title: input.Title,
-			Body:  input.Body,
-		},
-	); err != nil {
+	req := &models.UpdateNoteRequest{
+		Title: input.Title,
+		Body:  input.Body,
+	}
+
+	if err := r.grpc.UpdateNote(ctx, id, notebookID, req); err != nil {
 		return false, err
 	}
 
@@ -57,12 +74,34 @@ func (r *queryResolver) Note(ctx context.Context, id uuid.UUID, notebookID uuid.
 		return nil, err
 	}
 
-	return &gqlmodels.Note{
+	files, err := r.grpc.GetAllFiles(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	var gqlfiles []*gqlmodels.File
+	for _, file := range files {
+		gqlfiles = append(
+			gqlfiles,
+			&gqlmodels.File{
+				ID:          uuid.MustParse(file.Id),
+				Name:        file.Name,
+				Size:        file.Size,
+				ContentType: file.ContentType,
+				CreatedAt:   file.CreatedAt.AsTime(),
+			},
+		)
+	}
+
+	output := &gqlmodels.Note{
 		ID:        uuid.MustParse(note.Id),
 		Title:     note.Title,
 		Body:      note.Body,
 		CreatedAt: note.CreatedAt.AsTime(),
-	}, nil
+		Files:     gqlfiles,
+	}
+
+	return output, nil
 }
 
 // Notes is the resolver for the notes field.
@@ -74,7 +113,8 @@ func (r *queryResolver) Notes(ctx context.Context, notebookID uuid.UUID) ([]*gql
 
 	var output []*gqlmodels.Note
 	for _, note := range notes {
-		output = append(output,
+		output = append(
+			output,
 			&gqlmodels.Note{
 				ID:        uuid.MustParse(note.Id),
 				Title:     note.Title,

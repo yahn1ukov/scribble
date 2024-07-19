@@ -1,24 +1,19 @@
 package grpc
 
 import (
+	"fmt"
+
 	"github.com/yahn1ukov/scribble/apps/gateway/internal/config"
 	filepb "github.com/yahn1ukov/scribble/libs/grpc/file"
 	notepb "github.com/yahn1ukov/scribble/libs/grpc/note"
 	notebookpb "github.com/yahn1ukov/scribble/libs/grpc/notebook"
-	"go.uber.org/fx"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-type Params struct {
-	fx.In
-
-	Cfg *config.Config
-}
-
-func NewNotebook(p Params) (notebookpb.NotebookServiceClient, error) {
+func NewNotebook(cfg *config.Config) (notebookpb.NotebookServiceClient, error) {
 	connection, err := grpc.NewClient(
-		p.Cfg.GRPC.Client.Notebook.Address,
+		fmt.Sprintf("%s:%d", cfg.GRPC.Client.Notebook.Host, cfg.GRPC.Client.Notebook.Port),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
@@ -30,9 +25,9 @@ func NewNotebook(p Params) (notebookpb.NotebookServiceClient, error) {
 	return client, nil
 }
 
-func NewNote(p Params) (notepb.NoteServiceClient, error) {
+func NewNote(cfg *config.Config) (notepb.NoteServiceClient, error) {
 	connection, err := grpc.NewClient(
-		p.Cfg.GRPC.Client.Note.Address,
+		fmt.Sprintf("%s:%d", cfg.GRPC.Client.Note.Host, cfg.GRPC.Client.Note.Port),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
@@ -44,9 +39,9 @@ func NewNote(p Params) (notepb.NoteServiceClient, error) {
 	return client, nil
 }
 
-func NewFile(p Params) (filepb.FileServiceClient, error) {
+func NewFile(cfg *config.Config) (filepb.FileServiceClient, error) {
 	connection, err := grpc.NewClient(
-		p.Cfg.GRPC.Client.File.Address,
+		fmt.Sprintf("%s:%d", cfg.GRPC.Client.File.Host, cfg.GRPC.Client.File.Port),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {

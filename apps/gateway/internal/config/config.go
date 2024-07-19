@@ -4,21 +4,25 @@ import "github.com/ilyakaznacheev/cleanenv"
 
 type Config struct {
 	HTTP struct {
-		Address string `yaml:"address"`
+		Host string `yaml:"host"`
+		Port int    `yaml:"port"`
 	} `yaml:"http"`
 
 	GRPC struct {
 		Client struct {
 			Notebook struct {
-				Address string `yaml:"address"`
+				Host string `yaml:"host"`
+				Port int    `yaml:"port"`
 			} `yaml:"notebook"`
 
 			Note struct {
-				Address string `yaml:"address"`
+				Host string `yaml:"host"`
+				Port int    `yaml:"port"`
 			} `yaml:"note"`
 
 			File struct {
-				Address string `yaml:"address"`
+				Host string `yaml:"host"`
+				Port int    `yaml:"port"`
 			} `yaml:"file"`
 		} `yaml:"client"`
 	} `yaml:"grpc"`
