@@ -1,22 +1,22 @@
 grpc:
   server:
     network: tcp
-    host: localhost
+    host: 0.0.0.0
     port: 50052
 db:
   postgres:
     driver: postgres
-    host: localhost
+    host: postgres
     port: 5432
     name: scribble
-    user: scribble
-    password: scribble
+    user: postgres
+    password: postgres
     sslMode: disable
 storage:
   minio:
-    accessKey: scribble
-    secretKey: scribble123
-    endpoint: localhost:9000
+    accessKey: minio
+    secretKey: minio123
+    endpoint: minio:9000
     bucket: scribble
     region: eu-west-1
     useSSL: false

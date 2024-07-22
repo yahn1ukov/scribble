@@ -1,30 +1,76 @@
 name: scribble
 
 services:
+  notebook:
+    build:
+      context: .
+      dockerfile: apps/notebook/Dockerfile
+    container_name: notebook
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  note:
+    build:
+      context: .
+      dockerfile: apps/note/Dockerfile
+    container_name: note
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  file:
+    build:
+      context: .
+      dockerfile: apps/file/Dockerfile
+    container_name: file
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  gateway:
+    build:
+      context: .
+      dockerfile: apps/gateway/Dockerfile
+    container_name: gateway
+    ports:
+      - 8000:8000
+    depends_on:
+      - notebook
+      - note
+      - file
+
   postgres:
     image: postgres:latest
+    container_name: postgres
     environment:
       POSTGRES_DB: scribble
-      POSTGRES_USER: scribble
-      POSTGRES_PASSWORD: scribble
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     ports:
       - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   minio:
     image: minio/minio:latest
+    container_name: minio
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: scribble
-      MINIO_ROOT_PASSWORD: scribble123
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
       MINIO_BROWSER: "on"
       MINIO_REGION: eu-west-1
-    volumes:
-      - minio_data:/data
     ports:
       - 9000:9000
       - 9001:9001
+    volumes:
+      - minio_data:/data
 
 volumes:
   postgres_data:

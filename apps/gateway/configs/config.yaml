@@ -1,14 +1,14 @@
 http:
-  host: localhost
+  host: 0.0.0.0
   port: 8000
 grpc:
   client:
     notebook:
-      host: localhost
+      host: notebook
       port: 50050
     note:
-      host: localhost
+      host: note
       port: 50051
     file:
-      host: localhost
+      host: file
       port: 50052

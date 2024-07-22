@@ -3,33 +3,36 @@ name: scribble-dev
 services:
   adminer:
     image: adminer:latest
+    container_name: adminer
     ports:
       - 8080:8080
 
   postgres:
     image: postgres:latest
+    container_name: postgres
     environment:
       POSTGRES_DB: scribble
-      POSTGRES_USER: scribble
-      POSTGRES_PASSWORD: scribble
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     ports:
       - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
   minio:
     image: minio/minio:latest
+    container_name: minio
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: scribble
-      MINIO_ROOT_PASSWORD: scribble123
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
       MINIO_BROWSER: "on"
       MINIO_REGION: eu-west-1
-    volumes:
-      - minio_data:/data
     ports:
       - 9000:9000
       - 9001:9001
+    volumes:
+      - minio_data:/data
 
 volumes:
   postgres_data:

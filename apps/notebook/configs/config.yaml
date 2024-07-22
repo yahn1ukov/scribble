@@ -1,14 +1,14 @@
 grpc:
   server:
     network: tcp
-    host: localhost
+    host: 0.0.0.0
     port: 50050
 db:
   postgres:
     driver: postgres
-    host: localhost
+    host: postgres
     port: 5432
     name: scribble
-    user: scribble
-    password: scribble
+    user: postgres
+    password: postgres
     sslMode: disable
