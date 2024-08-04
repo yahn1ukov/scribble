@@ -1,0 +1,28 @@
+extend type Query {
+    user: User! @isAuthenticated
+}
+
+extend type Mutation {
+    updateUser(input: UpdateUserInput!): Boolean! @isAuthenticated
+    updateUserPassword(input: UpdateUserPasswordInput!): Boolean! @isAuthenticated
+    deleteUser: Boolean! @isAuthenticated
+}
+
+type User {
+    id: UUID!
+    email: String!
+    firstName: String
+    lastName: String
+    createdAt: Time!
+}
+
+input UpdateUserInput {
+    email: String
+    firstName: String
+    lastName: String
+}
+
+input UpdateUserPasswordInput {
+    oldPassword: String!
+    newPassword: String!
+}

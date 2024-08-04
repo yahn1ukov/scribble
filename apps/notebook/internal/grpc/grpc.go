@@ -2,20 +2,15 @@ package grpc
 
 import (
 	"context"
-	"fmt"
-	"net"
-
 	"github.com/yahn1ukov/scribble/apps/notebook/internal/config"
-	pb "github.com/yahn1ukov/scribble/libs/grpc/notebook"
+	pb "github.com/yahn1ukov/scribble/proto/notebook"
 	"go.uber.org/fx"
 	"google.golang.org/grpc"
+	"net"
 )
 
-func Run(lc fx.Lifecycle, cfg *config.Config, server *server) {
-	listener, _ := net.Listen(
-		cfg.GRPC.Server.Network,
-		fmt.Sprintf("%s:%d", cfg.GRPC.Server.Host, cfg.GRPC.Server.Port),
-	)
+func Run(lc fx.Lifecycle, cfg *config.Config, server *Server) {
+	listener, _ := net.Listen(cfg.GRPC.Server.Network, cfg.GRPC.Server.Address)
 
 	svr := grpc.NewServer()
 

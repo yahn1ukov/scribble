@@ -6,62 +6,85 @@ package resolvers
 
 import (
 	"context"
-
 	"github.com/google/uuid"
 	"github.com/yahn1ukov/scribble/apps/gateway/internal/gql/gqlmodels"
-	"github.com/yahn1ukov/scribble/apps/gateway/internal/grpc/models"
+	"github.com/yahn1ukov/scribble/libs/grpc"
+	notebookpb "github.com/yahn1ukov/scribble/proto/notebook"
 )
 
-// CreateNotebook is the resolver for the createNotebook field.
 func (r *mutationResolver) CreateNotebook(ctx context.Context, input gqlmodels.CreateNotebookInput) (bool, error) {
-	req := &models.CreateNotebookRequest{
-		Title: input.Title,
-	}
+	userID := r.middleware.GetUserIDFromCtx(ctx)
 
-	if err := r.grpc.CreateNotebook(ctx, req); err != nil {
-		return false, err
+	if _, err := r.notebookClient.CreateNotebook(
+		ctx,
+		&notebookpb.CreateNotebookRequest{
+			UserId:      userID,
+			Title:       input.Title,
+			Description: input.Description,
+		},
+	); err != nil {
+		return false, grpc.ParseError(err).Error()
 	}
 
 	return true, nil
 }
 
-// UpdateNotebook is the resolver for the updateNotebook field.
 func (r *mutationResolver) UpdateNotebook(ctx context.Context, id uuid.UUID, input gqlmodels.UpdateNotebookInput) (bool, error) {
-	req := &models.UpdateNotebookRequest{
-		Title: input.Title,
-	}
+	userID := r.middleware.GetUserIDFromCtx(ctx)
 
-	if err := r.grpc.UpdateNotebook(ctx, id, req); err != nil {
-		return false, err
+	if _, err := r.notebookClient.UpdateNotebook(
+		ctx,
+		&notebookpb.UpdateNotebookRequest{
+			Id:          id.String(),
+			UserId:      userID,
+			Title:       input.Title,
+			Description: input.Description,
+		},
+	); err != nil {
+		return false, grpc.ParseError(err).Error()
 	}
 
 	return true, nil
 }
 
-// DeleteNotebook is the resolver for the deleteNotebook field.
 func (r *mutationResolver) DeleteNotebook(ctx context.Context, id uuid.UUID) (bool, error) {
-	if err := r.grpc.DeleteNotebook(ctx, id); err != nil {
-		return false, err
+	userID := r.middleware.GetUserIDFromCtx(ctx)
+
+	if _, err := r.notebookClient.DeleteNotebook(
+		ctx,
+		&notebookpb.DeleteNotebookRequest{
+			Id:     id.String(),
+			UserId: userID,
+		},
+	); err != nil {
+		return false, grpc.ParseError(err).Error()
 	}
 
 	return true, nil
 }
 
-// Notebooks is the resolver for the notebooks field.
 func (r *queryResolver) Notebooks(ctx context.Context) ([]*gqlmodels.Notebook, error) {
-	notebooks, err := r.grpc.GetAllNotebooks(ctx)
+	userID := r.middleware.GetUserIDFromCtx(ctx)
+
+	res, err := r.notebookClient.ListNotebooks(
+		ctx,
+		&notebookpb.ListNotebooksRequest{
+			UserId: userID,
+		},
+	)
 	if err != nil {
-		return nil, err
+		return nil, grpc.ParseError(err).Error()
 	}
 
 	var output []*gqlmodels.Notebook
-	for _, notebook := range notebooks {
+	for _, notebook := range res.Notebooks {
 		output = append(
 			output,
 			&gqlmodels.Notebook{
-				ID:        uuid.MustParse(notebook.Id),
-				Title:     notebook.Title,
-				CreatedAt: notebook.CreatedAt.AsTime(),
+				ID:          uuid.MustParse(notebook.Id),
+				Title:       notebook.Title,
+				Description: notebook.Description,
+				CreatedAt:   notebook.CreatedAt.AsTime(),
 			},
 		)
 	}

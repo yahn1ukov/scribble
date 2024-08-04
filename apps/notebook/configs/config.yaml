@@ -1,14 +1,7 @@
 grpc:
   server:
     network: tcp
-    host: 0.0.0.0
-    port: 50050
+    address: 0.0.0.0:50051
 db:
   postgres:
-    driver: postgres
-    host: postgres
-    port: 5432
-    name: scribble
-    user: postgres
-    password: postgres
-    sslMode: disable
+    url: postgres://postgres:postgres@localhost:5432/scribble?sslmode=disable

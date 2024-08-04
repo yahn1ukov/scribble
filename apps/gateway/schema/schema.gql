@@ -1,6 +1,8 @@
 type Query
 type Mutation
 
+directive @isAuthenticated on FIELD_DEFINITION
+
 scalar UUID
 scalar Time
 scalar Upload

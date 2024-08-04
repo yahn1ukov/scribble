@@ -1,14 +1,16 @@
 http:
-  host: 0.0.0.0
-  port: 8000
+  address: 0.0.0.0:8000
 grpc:
   client:
+    user:
+      address: 0.0.0.0:50050
     notebook:
-      host: notebook
-      port: 50050
+      address: 0.0.0.0:50051
     note:
-      host: note
-      port: 50051
+      address: 0.0.0.0:50052
     file:
-      host: file
-      port: 50052
+      address: 0.0.0.0:50053
+    auth:
+      address: 0.0.0.0:50054
+jwt:
+  secret: asfsf90s8f0s8f0sd8fsfklsjfsdof8uqewrnmnaldf

@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package note;
+
+option go_package = "github.com/yahn1ukov/scribble/proto/note";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+message Note {
+    string id = 1;
+    string title = 2;
+    optional string content = 3;
+    google.protobuf.Timestamp created_at = 4;
+}
+
+message CreateNoteRequest {
+    string notebook_id = 1;
+    string title = 2;
+    optional string content = 3;
+}
+
+message CreateNoteResponse {
+    string id = 1;
+}
+
+message ListNotesRequest {
+    string notebook_id = 1;
+}
+
+message ListNotesResponse {
+    repeated Note notes = 1;
+}
+
+message GetNoteRequest {
+    string id = 1;
+    string notebook_id = 2;
+}
+
+message UpdateNoteRequest {
+    string id = 1;
+    string notebook_id = 2;
+    optional string title = 3;
+    optional string content = 4;
+}
+
+message DeleteNoteRequest {
+    string id = 1;
+    string notebook_id = 2;
+}
+
+service NoteService {
+    rpc CreateNote(CreateNoteRequest) returns (CreateNoteResponse);
+    rpc ListNotes(ListNotesRequest) returns (ListNotesResponse);
+    rpc GetNote(GetNoteRequest) returns (Note);
+    rpc UpdateNote(UpdateNoteRequest) returns (google.protobuf.Empty);
+    rpc DeleteNote(DeleteNoteRequest) returns (google.protobuf.Empty);
+}

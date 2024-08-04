@@ -2,18 +2,17 @@ package services
 
 import (
 	"context"
-
 	"github.com/yahn1ukov/scribble/apps/note/internal/dto"
 	"github.com/yahn1ukov/scribble/apps/note/internal/model"
 	"github.com/yahn1ukov/scribble/apps/note/internal/repositories"
-	pb "github.com/yahn1ukov/scribble/libs/grpc/note"
+	pb "github.com/yahn1ukov/scribble/proto/note"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type Service interface {
 	Create(context.Context, string, *dto.CreateInput) (string, error)
 	GetAll(context.Context, string) ([]*pb.Note, error)
-	Get(context.Context, string, string) (*pb.Note, error)
+	GetByID(context.Context, string, string) (*pb.Note, error)
 	Update(context.Context, string, string, *dto.UpdateInput) error
 	Delete(context.Context, string, string) error
 }
@@ -30,12 +29,12 @@ func NewService(repository repositories.Repository) Service {
 
 func (s *service) Create(ctx context.Context, notebookID string, input *dto.CreateInput) (string, error) {
 	if input.Title == "" {
-		return "", repositories.ErrTitleRequired
+		return "", ErrTitleIsRequired
 	}
 
 	note := &model.Note{
-		Title: input.Title,
-		Body:  input.Body,
+		Title:   input.Title,
+		Content: input.Content,
 	}
 
 	return s.repository.Create(ctx, notebookID, note)
@@ -49,11 +48,12 @@ func (s *service) GetAll(ctx context.Context, notebookID string) ([]*pb.Note, er
 
 	var output []*pb.Note
 	for _, note := range notes {
-		output = append(output,
+		output = append(
+			output,
 			&pb.Note{
 				Id:        note.ID,
 				Title:     note.Title,
-				Body:      note.Body,
+				Content:   note.Content,
 				CreatedAt: timestamppb.New(note.CreatedAt),
 			},
 		)
@@ -62,8 +62,8 @@ func (s *service) GetAll(ctx context.Context, notebookID string) ([]*pb.Note, er
 	return output, nil
 }
 
-func (s *service) Get(ctx context.Context, id string, notebookID string) (*pb.Note, error) {
-	note, err := s.repository.Get(ctx, id, notebookID)
+func (s *service) GetByID(ctx context.Context, id string, notebookID string) (*pb.Note, error) {
+	note, err := s.repository.GetByID(ctx, id, notebookID)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func (s *service) Get(ctx context.Context, id string, notebookID string) (*pb.No
 	output := &pb.Note{
 		Id:        note.ID,
 		Title:     note.Title,
-		Body:      note.Body,
+		Content:   note.Content,
 		CreatedAt: timestamppb.New(note.CreatedAt),
 	}
 
@@ -79,19 +79,21 @@ func (s *service) Get(ctx context.Context, id string, notebookID string) (*pb.No
 }
 
 func (s *service) Update(ctx context.Context, id string, notebookID string, input *dto.UpdateInput) error {
-	note, err := s.repository.Get(ctx, id, notebookID)
-	if err != nil {
-		return err
+	updatedFields := make(map[string]interface{})
+
+	if input.Title != nil && *input.Title != "" {
+		updatedFields["title"] = *input.Title
 	}
 
-	if input.Title == "" {
-		return repositories.ErrTitleRequired
+	if input.Content != nil {
+		updatedFields["content"] = *input.Content
 	}
 
-	note.Title = input.Title
-	note.Body = input.Body
+	if len(updatedFields) == 0 {
+		return ErrNoFieldsToUpdate
+	}
 
-	return s.repository.Update(ctx, id, notebookID, note)
+	return s.repository.Update(ctx, id, notebookID, updatedFields)
 }
 
 func (s *service) Delete(ctx context.Context, id string, notebookID string) error {

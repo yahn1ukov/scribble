@@ -6,32 +6,44 @@ package resolvers
 
 import (
 	"context"
-
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/google/uuid"
-	"github.com/yahn1ukov/scribble/apps/gateway/internal/grpc/models"
+	"github.com/yahn1ukov/scribble/libs/grpc"
+	filepb "github.com/yahn1ukov/scribble/proto/file"
+	"io"
 )
 
-// UploadFile is the resolver for the uploadFile field.
 func (r *mutationResolver) UploadFile(ctx context.Context, noteID uuid.UUID, file graphql.Upload) (bool, error) {
-	req := &models.UploadFileRequest{
-		Name:        file.Filename,
-		Size:        file.Size,
-		ContentType: file.ContentType,
-		Content:     file.File,
+	content, err := io.ReadAll(file.File)
+	if err != nil {
+		return false, err
 	}
 
-	if err := r.grpc.UploadFile(ctx, noteID, req); err != nil {
-		return false, err
+	if _, err = r.fileClient.UploadFile(
+		ctx,
+		&filepb.UploadFileRequest{
+			NoteId:      noteID.String(),
+			Name:        file.Filename,
+			Size:        file.Size,
+			ContentType: file.ContentType,
+			Content:     content,
+		},
+	); err != nil {
+		return false, grpc.ParseError(err).Error()
 	}
 
 	return true, nil
 }
 
-// RemoveFile is the resolver for the removeFile field.
 func (r *mutationResolver) RemoveFile(ctx context.Context, id uuid.UUID, noteID uuid.UUID) (bool, error) {
-	if err := r.grpc.RemoveFile(ctx, id, noteID); err != nil {
-		return false, err
+	if _, err := r.fileClient.RemoveFile(
+		ctx,
+		&filepb.RemoveFileRequest{
+			Id:     id.String(),
+			NoteId: noteID.String(),
+		},
+	); err != nil {
+		return false, grpc.ParseError(err).Error()
 	}
 
 	return true, nil

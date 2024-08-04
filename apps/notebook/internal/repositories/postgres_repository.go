@@ -2,40 +2,58 @@ package repositories
 
 import (
 	"context"
-	"database/sql"
 	"errors"
-
-	"github.com/lib/pq"
+	sq "github.com/Masterminds/squirrel"
+	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/yahn1ukov/scribble/apps/notebook/internal/model"
 )
 
 type postgresRepository struct {
-	db *sql.DB
+	pool *pgxpool.Pool
 }
 
-func NewPostgresRepository(db *sql.DB) Repository {
+func NewPostgresRepository(pool *pgxpool.Pool) Repository {
 	return &postgresRepository{
-		db: db,
+		pool: pool,
 	}
 }
 
-func (r *postgresRepository) Create(ctx context.Context, notebook *model.Notebook) error {
-	query := "INSERT INTO notebooks(title) VALUES($1)"
+func (r *postgresRepository) Create(ctx context.Context, userID string, notebook *model.Notebook) error {
+	query, args, err := sq.
+		Insert("notebooks").
+		Columns("user_id", "title", "description").
+		Values(userID, notebook.Title, notebook.Description).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return err
+	}
 
-	if _, err := r.db.ExecContext(ctx, query, notebook.Title); err != nil {
-		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code.Name() == "unique_violation" {
+	if _, err = r.pool.Exec(ctx, query, args...); err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
 			return ErrAlreadyExists
 		}
+
 		return err
 	}
 
 	return nil
 }
 
-func (r *postgresRepository) GetAll(ctx context.Context) ([]*model.Notebook, error) {
-	query := "SELECT id, title, created_at FROM notebooks"
+func (r *postgresRepository) GetAll(ctx context.Context, userID string) ([]*model.Notebook, error) {
+	query, args, err := sq.
+		Select("id", "title", "description", "created_at").
+		From("notebooks").
+		Where(sq.Eq{"user_id": userID}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
 
-	rows, err := r.db.QueryContext(ctx, query)
+	rows, err := r.pool.Query(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -44,67 +62,69 @@ func (r *postgresRepository) GetAll(ctx context.Context) ([]*model.Notebook, err
 	var notebooks []*model.Notebook
 	for rows.Next() {
 		var notebook model.Notebook
-		if err := rows.Scan(&notebook.ID, &notebook.Title, &notebook.CreatedAt); err != nil {
+		if err = rows.Scan(
+			&notebook.ID,
+			&notebook.Title,
+			&notebook.Description,
+			&notebook.CreatedAt,
+		); err != nil {
 			return nil, err
 		}
+
 		notebooks = append(notebooks, &notebook)
 	}
 
-	if err := rows.Err(); err != nil {
+	if err = rows.Err(); err != nil {
 		return nil, err
 	}
 
 	return notebooks, nil
 }
 
-func (r *postgresRepository) Get(ctx context.Context, id string) (*model.Notebook, error) {
-	query := "SELECT id, title, created_at FROM notebooks WHERE id = $1 LIMIT 1"
+func (r *postgresRepository) Update(ctx context.Context, id string, userID string, updatedFields map[string]interface{}) error {
+	query, args, err := sq.
+		Update("notebooks").
+		SetMap(updatedFields).
+		Where(sq.Eq{"id": id, "user_id": userID}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return err
+	}
 
-	var notebook model.Notebook
-	if err := r.db.QueryRowContext(ctx, query, id).Scan(&notebook.ID, &notebook.Title, &notebook.CreatedAt); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, ErrNotFound
+	result, err := r.pool.Exec(ctx, query, args...)
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			return ErrAlreadyExists
 		}
-		return nil, err
-	}
 
-	return &notebook, nil
-}
-
-func (r *postgresRepository) Update(ctx context.Context, id string, notebook *model.Notebook) error {
-	query := "UPDATE notebooks SET title = $1 WHERE id = $2"
-
-	result, err := r.db.ExecContext(ctx, query, notebook.Title, id)
-	if err != nil {
 		return err
 	}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	if rowsAffected == 0 {
+	if result.RowsAffected() == 0 {
 		return ErrNotFound
 	}
 
 	return nil
 }
 
-func (r *postgresRepository) Delete(ctx context.Context, id string) error {
-	query := "DELETE FROM notebooks WHERE id = $1"
-
-	result, err := r.db.ExecContext(ctx, query, id)
+func (r *postgresRepository) Delete(ctx context.Context, id string, userID string) error {
+	query, args, err := sq.
+		Delete("notebooks").
+		Where(sq.Eq{"id": id, "user_id": userID}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
 	if err != nil {
 		return err
 	}
 
-	rowsAffected, err := result.RowsAffected()
+	result, err := r.pool.Exec(ctx, query, args...)
 	if err != nil {
 		return err
 	}
 
-	if rowsAffected == 0 {
+	if result.RowsAffected() == 0 {
 		return ErrNotFound
 	}
 

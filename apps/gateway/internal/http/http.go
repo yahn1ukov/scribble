@@ -2,22 +2,23 @@ package http
 
 import (
 	"context"
-	"fmt"
-	"net/http"
-
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/yahn1ukov/scribble/apps/gateway/internal/config"
 	"go.uber.org/fx"
+	"net/http"
 )
 
-func Run(lc fx.Lifecycle, cfg *config.Config, server *handler.Server, handler *Handler) {
+func Run(lc fx.Lifecycle, cfg *config.Config, server *handler.Server, handler *Handler, middleware *Middleware) {
 	mux := http.NewServeMux()
 
-	mux.Handle("/", server)
-	mux.HandleFunc("GET /files/{fileId}/notes/{noteId}", handler.DownloadFile)
+	mux.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	mux.Handle("/query", middleware.AuthMiddleware(server))
+
+	mux.Handle("GET /notes/{noteId}/files/{fileId}", middleware.AuthMiddleware(http.HandlerFunc(handler.DownloadFile)))
 
 	svr := &http.Server{
-		Addr:    fmt.Sprintf("%s:%d", cfg.HTTP.Host, cfg.HTTP.Port),
+		Addr:    cfg.HTTP.Address,
 		Handler: mux,
 	}
 

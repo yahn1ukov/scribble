@@ -9,14 +9,19 @@ import (
 	"github.com/google/uuid"
 )
 
+type AuthOutput struct {
+	Token string `json:"token"`
+}
+
 type CreateNoteInput struct {
-	Title string            `json:"title"`
-	Body  string            `json:"body"`
-	Files []*graphql.Upload `json:"files"`
+	Title   string            `json:"title"`
+	Content *string           `json:"content,omitempty"`
+	Files   []*graphql.Upload `json:"files,omitempty"`
 }
 
 type CreateNotebookInput struct {
-	Title string `json:"title"`
+	Title       string  `json:"title"`
+	Description *string `json:"description,omitempty"`
 }
 
 type File struct {
@@ -27,31 +32,64 @@ type File struct {
 	CreatedAt   time.Time `json:"createdAt"`
 }
 
+type LoginInput struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
 type Mutation struct {
 }
 
 type Note struct {
 	ID        uuid.UUID `json:"id"`
 	Title     string    `json:"title"`
-	Body      string    `json:"body"`
+	Content   *string   `json:"content,omitempty"`
 	CreatedAt time.Time `json:"createdAt"`
 	Files     []*File   `json:"files"`
 }
 
 type Notebook struct {
-	ID        uuid.UUID `json:"id"`
-	Title     string    `json:"title"`
-	CreatedAt time.Time `json:"createdAt"`
+	ID          uuid.UUID `json:"id"`
+	Title       string    `json:"title"`
+	Description *string   `json:"description,omitempty"`
+	CreatedAt   time.Time `json:"createdAt"`
 }
 
 type Query struct {
 }
 
+type RegisterInput struct {
+	Email     string  `json:"email"`
+	FirstName *string `json:"firstName,omitempty"`
+	LastName  *string `json:"lastName,omitempty"`
+	Password  string  `json:"password"`
+}
+
 type UpdateNoteInput struct {
-	Title string `json:"title"`
-	Body  string `json:"body"`
+	Title   *string `json:"title,omitempty"`
+	Content *string `json:"content,omitempty"`
 }
 
 type UpdateNotebookInput struct {
-	Title string `json:"title"`
+	Title       *string `json:"title,omitempty"`
+	Description *string `json:"description,omitempty"`
+}
+
+type UpdateUserInput struct {
+	Email     *string `json:"email,omitempty"`
+	FirstName *string `json:"firstName,omitempty"`
+	LastName  *string `json:"lastName,omitempty"`
+}
+
+type UpdateUserPasswordInput struct {
+	OldPassword string `json:"oldPassword"`
+	NewPassword string `json:"newPassword"`
+}
+
+type User struct {
+	ID        uuid.UUID `json:"id"`
+	Email     string    `json:"email"`
+	FirstName *string   `json:"firstName,omitempty"`
+	LastName  *string   `json:"lastName,omitempty"`
+	CreatedAt time.Time `json:"createdAt"`
 }

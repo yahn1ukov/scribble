@@ -1,6 +1,15 @@
 name: scribble
 
 services:
+  user:
+    build:
+      context: .
+      dockerfile: apps/user/Dockerfile
+    container_name: user
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   notebook:
     build:
       context: .
@@ -28,6 +37,12 @@ services:
       postgres:
         condition: service_healthy
 
+  auth:
+    build:
+      context: .
+      dockerfile: apps/auth/Dockerfile
+    container_name: auth
+
   gateway:
     build:
       context: .
@@ -36,9 +51,11 @@ services:
     ports:
       - 8000:8000
     depends_on:
+      - user
       - notebook
       - note
       - file
+      - auth
 
   postgres:
     image: postgres:latest

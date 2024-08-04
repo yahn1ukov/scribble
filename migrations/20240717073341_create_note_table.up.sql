@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS notes (
     "id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    "title" VARCHAR NOT NULL,
-    "body" TEXT,
     "notebook_id" UUID NOT NULL REFERENCES notebooks("id") ON DELETE CASCADE,
+    "title" VARCHAR NOT NULL,
+    "content" TEXT,
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT now(),
     "updated_at" TIMESTAMPTZ
 );

@@ -1,35 +1,44 @@
 package http
 
 import (
-	"net/http"
-
-	"github.com/yahn1ukov/scribble/apps/gateway/internal/grpc/clients"
+	"github.com/yahn1ukov/scribble/libs/grpc"
 	"github.com/yahn1ukov/scribble/libs/respond"
+	filepb "github.com/yahn1ukov/scribble/proto/file"
 	"google.golang.org/grpc/codes"
+	"net/http"
 )
 
 type Handler struct {
-	grpc *clients.Client
+	fileClient filepb.FileServiceClient
 }
 
-func NewHandler(grpc *clients.Client) *Handler {
+func NewHandler(fileClient filepb.FileServiceClient) *Handler {
 	return &Handler{
-		grpc: grpc,
+		fileClient: fileClient,
 	}
 }
 
 func (h *Handler) DownloadFile(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	id := r.PathValue("fileId")
 	noteID := r.PathValue("noteId")
+	id := r.PathValue("fileId")
 
-	file, grpcErr := h.grpc.DownloadFile(ctx, id, noteID)
+	file, grpcErr := h.fileClient.DownloadFile(
+		ctx,
+		&filepb.DownloadFileRequest{
+			Id:     id,
+			NoteId: noteID,
+		},
+	)
 	if grpcErr != nil {
-		if grpcErr.Code() == codes.NotFound {
-			respond.Error(w, http.StatusNotFound, grpcErr.Error())
+		err := grpc.ParseError(grpcErr)
+
+		if err.Code() == codes.NotFound {
+			respond.Error(w, http.StatusNotFound, err.Error())
 			return
 		}
-		respond.Error(w, http.StatusBadRequest, grpcErr.Error())
+
+		respond.Error(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 

@@ -4,21 +4,20 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io"
-
 	"github.com/minio/minio-go/v7"
 	"github.com/yahn1ukov/scribble/apps/file/internal/config"
 	"github.com/yahn1ukov/scribble/apps/file/internal/dto"
 	"github.com/yahn1ukov/scribble/apps/file/internal/model"
 	"github.com/yahn1ukov/scribble/apps/file/internal/repositories"
-	pb "github.com/yahn1ukov/scribble/libs/grpc/file"
+	pb "github.com/yahn1ukov/scribble/proto/file"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"io"
 )
 
 type Service interface {
 	GetAll(context.Context, string) ([]*pb.File, error)
-	Get(context.Context, string, string) (*pb.DownloadFileResponse, error)
+	GetByID(context.Context, string, string) (*pb.DownloadFileResponse, error)
 	Upload(context.Context, string, *dto.UploadInput) error
 	Remove(context.Context, string, string) error
 }
@@ -80,7 +79,8 @@ func (s *service) GetAll(ctx context.Context, noteID string) ([]*pb.File, error)
 
 	var output []*pb.File
 	for _, file := range files {
-		output = append(output,
+		output = append(
+			output,
 			&pb.File{
 				Id:          file.ID,
 				Name:        file.Name,
@@ -94,8 +94,8 @@ func (s *service) GetAll(ctx context.Context, noteID string) ([]*pb.File, error)
 	return output, nil
 }
 
-func (s *service) Get(ctx context.Context, id string, noteID string) (*pb.DownloadFileResponse, error) {
-	file, err := s.repository.Get(ctx, id, noteID)
+func (s *service) GetByID(ctx context.Context, id string, noteID string) (*pb.DownloadFileResponse, error) {
+	file, err := s.repository.GetByID(ctx, id, noteID)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +120,7 @@ func (s *service) Get(ctx context.Context, id string, noteID string) (*pb.Downlo
 }
 
 func (s *service) Remove(ctx context.Context, id string, noteID string) error {
-	file, err := s.repository.Get(ctx, id, noteID)
+	file, err := s.repository.GetByID(ctx, id, noteID)
 	if err != nil {
 		return err
 	}

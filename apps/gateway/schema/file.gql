@@ -1,6 +1,6 @@
 extend type Mutation {
-    uploadFile(noteID: UUID!, file: Upload!): Boolean!
-    removeFile(id: UUID!, noteID: UUID!): Boolean!
+    uploadFile(noteID: UUID!, file: Upload!): Boolean! @isAuthenticated
+    removeFile(id: UUID!, noteID: UUID!): Boolean! @isAuthenticated
 }
 
 type File {

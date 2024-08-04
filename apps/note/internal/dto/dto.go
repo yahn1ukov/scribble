@@ -1,11 +1,11 @@
 package dto
 
 type CreateInput struct {
-	Title string
-	Body  string
+	Title   string
+	Content *string
 }
 
 type UpdateInput struct {
-	Title string
-	Body  string
+	Title   *string
+	Content *string
 }

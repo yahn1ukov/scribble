@@ -3,30 +3,29 @@ package grpc
 import (
 	"context"
 	"errors"
-	"io"
-
 	"github.com/yahn1ukov/scribble/apps/file/internal/dto"
 	"github.com/yahn1ukov/scribble/apps/file/internal/repositories"
 	"github.com/yahn1ukov/scribble/apps/file/internal/services"
-	pb "github.com/yahn1ukov/scribble/libs/grpc/file"
+	pb "github.com/yahn1ukov/scribble/proto/file"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"io"
 )
 
-type server struct {
+type Server struct {
 	pb.UnimplementedFileServiceServer
 
 	service services.Service
 }
 
-func NewServer(service services.Service) *server {
-	return &server{
+func NewServer(service services.Service) *Server {
+	return &Server{
 		service: service,
 	}
 }
 
-func (s *server) UploadFile(ctx context.Context, req *pb.UploadFileRequest) (*emptypb.Empty, error) {
+func (s *Server) UploadFile(ctx context.Context, req *pb.UploadFileRequest) (*emptypb.Empty, error) {
 	input := &dto.UploadInput{
 		Name:        req.Name,
 		Size:        req.Size,
@@ -41,7 +40,7 @@ func (s *server) UploadFile(ctx context.Context, req *pb.UploadFileRequest) (*em
 	return &emptypb.Empty{}, nil
 }
 
-func (s *server) UploadAllFiles(stream pb.FileService_UploadAllFilesServer) error {
+func (s *Server) UploadAllFiles(stream pb.FileService_UploadAllFilesServer) error {
 	for {
 		ctx := stream.Context()
 
@@ -66,34 +65,36 @@ func (s *server) UploadAllFiles(stream pb.FileService_UploadAllFilesServer) erro
 	}
 }
 
-func (s *server) GetAllFiles(ctx context.Context, req *pb.GetAllFilesRequest) (*pb.Files, error) {
+func (s *Server) ListFiles(ctx context.Context, req *pb.ListFilesRequest) (*pb.ListFilesResponse, error) {
 	files, err := s.service.GetAll(ctx, req.NoteId)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 
-	return &pb.Files{
+	return &pb.ListFilesResponse{
 		Files: files,
 	}, nil
 }
 
-func (s *server) DownloadFile(ctx context.Context, req *pb.DownloadFileRequest) (*pb.DownloadFileResponse, error) {
-	file, err := s.service.Get(ctx, req.Id, req.NoteId)
+func (s *Server) DownloadFile(ctx context.Context, req *pb.DownloadFileRequest) (*pb.DownloadFileResponse, error) {
+	file, err := s.service.GetByID(ctx, req.Id, req.NoteId)
 	if err != nil {
 		if errors.Is(err, repositories.ErrNotFound) {
 			return nil, status.Error(codes.NotFound, err.Error())
 		}
+
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	return file, nil
 }
 
-func (s *server) RemoveFile(ctx context.Context, req *pb.RemoveFileRequest) (*emptypb.Empty, error) {
+func (s *Server) RemoveFile(ctx context.Context, req *pb.RemoveFileRequest) (*emptypb.Empty, error) {
 	if err := s.service.Remove(ctx, req.Id, req.NoteId); err != nil {
 		if errors.Is(err, repositories.ErrNotFound) {
 			return nil, status.Error(codes.NotFound, err.Error())
 		}
+
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 

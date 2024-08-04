@@ -2,6 +2,4 @@ package repositories
 
 import "errors"
 
-var (
-	ErrNotFound = errors.New("file not found")
-)
+var ErrNotFound = errors.New("file not found")

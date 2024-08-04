@@ -1,10 +1,15 @@
 go 1.22.5
 
 use (
+	./apps/auth
 	./apps/file
 	./apps/gateway
 	./apps/note
 	./apps/notebook
+	./apps/user
 	./libs/grpc
+	./libs/hash
+	./libs/jwt
 	./libs/respond
+	./proto
 )

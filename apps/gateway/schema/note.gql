@@ -1,29 +1,29 @@
 extend type Query {
-    note(id: UUID!, notebookID: UUID!): Note!
-    notes(notebookID: UUID!): [Note]!
+    note(id: UUID!, notebookID: UUID!): Note! @isAuthenticated
+    notes(notebookID: UUID!): [Note]! @isAuthenticated
 }
 
 extend type Mutation {
-    createNote(notebookID: UUID!, input: CreateNoteInput!): Boolean!
-    updateNote(id: UUID!, notebookID: UUID!, input: UpdateNoteInput!): Boolean!
-    deleteNote(id: UUID!, notebookID: UUID!): Boolean!
+    createNote(notebookID: UUID!, input: CreateNoteInput!): Boolean! @isAuthenticated
+    updateNote(id: UUID!, notebookID: UUID!, input: UpdateNoteInput!): Boolean! @isAuthenticated
+    deleteNote(id: UUID!, notebookID: UUID!): Boolean! @isAuthenticated
 }
 
 type Note {
     id: UUID!
     title: String!
-    body: String!
+    content: String
     createdAt: Time!
     files: [File]!
 }
 
 input CreateNoteInput {
     title: String!
-    body: String!
-    files: [Upload]!
+    content: String
+    files: [Upload]
 }
 
 input UpdateNoteInput {
-    title: String!
-    body: String!
+    title: String
+    content: String
 }
