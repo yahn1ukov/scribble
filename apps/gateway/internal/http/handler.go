@@ -9,17 +9,25 @@ import (
 )
 
 type Handler struct {
+	middleware *Middleware
 	fileClient filepb.FileServiceClient
 }
 
-func NewHandler(fileClient filepb.FileServiceClient) *Handler {
+func NewHandler(middleware *Middleware, fileClient filepb.FileServiceClient) *Handler {
 	return &Handler{
+		middleware: middleware,
 		fileClient: fileClient,
 	}
 }
 
 func (h *Handler) DownloadFile(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+
+	if userID := h.middleware.GetUserIDFromCtx(ctx); userID == "" {
+		respond.Error(w, http.StatusUnauthorized, ErrUnauthorized)
+		return
+	}
+
 	noteID := r.PathValue("noteId")
 	id := r.PathValue("fileId")
 

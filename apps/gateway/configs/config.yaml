@@ -3,14 +3,14 @@ http:
 grpc:
   client:
     user:
-      address: 0.0.0.0:50050
+      address: user:50050
     notebook:
-      address: 0.0.0.0:50051
+      address: notebook:50051
     note:
-      address: 0.0.0.0:50052
+      address: note:50052
     file:
-      address: 0.0.0.0:50053
+      address: file:50053
     auth:
-      address: 0.0.0.0:50054
+      address: auth:50054
 jwt:
   secret: asfsf90s8f0s8f0sd8fsfklsjfsdof8uqewrnmnaldf

@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"errors"
 	"github.com/yahn1ukov/scribble/apps/gateway/internal/config"
 	"github.com/yahn1ukov/scribble/libs/jwt"
 	"github.com/yahn1ukov/scribble/libs/respond"
@@ -24,7 +25,7 @@ func NewMiddleware(cfg *config.Config, userClient userpb.UserServiceClient) *Mid
 	}
 }
 
-func (m *Middleware) AuthMiddleware(next http.Handler) http.Handler {
+func (m *Middleware) Auth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		header := r.Header.Get("Authorization")
 
@@ -34,7 +35,7 @@ func (m *Middleware) AuthMiddleware(next http.Handler) http.Handler {
 		}
 
 		if !strings.HasPrefix(header, "Bearer ") {
-			respond.Error(w, http.StatusForbidden, ErrInvalidFormat)
+			respond.Error(w, http.StatusUnauthorized, ErrInvalidFormat)
 			return
 		}
 
@@ -42,7 +43,12 @@ func (m *Middleware) AuthMiddleware(next http.Handler) http.Handler {
 
 		claims, err := jwt.Validate(token, m.cfg.JWT.Secret)
 		if err != nil {
-			respond.Error(w, http.StatusForbidden, ErrInvalidToken)
+			if errors.Is(err, jwt.ErrInvalidToken) {
+				respond.Error(w, http.StatusUnauthorized, ErrInvalidToken)
+				return
+			}
+
+			respond.Error(w, http.StatusForbidden, ErrAccessDenied)
 			return
 		}
 

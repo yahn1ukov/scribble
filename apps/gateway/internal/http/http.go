@@ -13,9 +13,9 @@ func Run(lc fx.Lifecycle, cfg *config.Config, server *handler.Server, handler *H
 	mux := http.NewServeMux()
 
 	mux.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	mux.Handle("/query", middleware.AuthMiddleware(server))
+	mux.Handle("/query", middleware.Auth(server))
 
-	mux.Handle("GET /notes/{noteId}/files/{fileId}", middleware.AuthMiddleware(http.HandlerFunc(handler.DownloadFile)))
+	mux.Handle("GET /notes/{noteId}/files/{fileId}", middleware.Auth(http.HandlerFunc(handler.DownloadFile)))
 
 	svr := &http.Server{
 		Addr:    cfg.HTTP.Address,
