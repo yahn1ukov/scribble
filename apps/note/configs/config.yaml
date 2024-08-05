@@ -4,4 +4,4 @@ grpc:
     address: 0.0.0.0:50052
 db:
   postgres:
-    url: postgres://postgres:postgres@localhost:5432/scribble?sslmode=disable
+    url: postgres://postgres:postgres@postgres:5432/scribble?sslmode=disable

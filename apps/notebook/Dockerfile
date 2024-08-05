@@ -2,10 +2,6 @@ FROM golang:1.22.5-alpine AS builder
 
 WORKDIR /app
 
-RUN apk add --no-cache protobuf protobuf-dev && \
-    go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \
-    go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
-
 COPY proto/go.mod proto/go.sum /app/proto/
 COPY apps/notebook/go.mod apps/notebook/go.sum /app/apps/notebook/
 
@@ -16,11 +12,6 @@ RUN go work init && \
 
 COPY proto /app/proto
 COPY apps/notebook /app/apps/notebook
-
-RUN protoc --proto_path=/app/proto/notebook \
-    --go_out=/app/proto/notebook \
-    --go-grpc_out=/app/proto/notebook \
-    /app/proto/notebook/notebook.proto
 
 RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /app/notebook /app/apps/notebook/cmd/main.go
 

@@ -4,7 +4,7 @@ grpc:
     address: 0.0.0.0:50054
   client:
     user:
-      address: 0.0.0.0:50050
+      address: user:50050
 jwt:
   secret: asfsf90s8f0s8f0sd8fsfklsjfsdof8uqewrnmnaldf
   expiry: 60
