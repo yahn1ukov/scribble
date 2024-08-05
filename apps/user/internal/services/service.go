@@ -38,7 +38,7 @@ func (s *service) Create(ctx context.Context, input *dto.CreateInput) (string, e
 		return "", ErrPasswordIsRequired
 	}
 
-	passwordHash, err := hash.Hash(input.Password)
+	hashedPassword, err := hash.Hash(input.Password)
 	if err != nil {
 		return "", err
 	}
@@ -47,7 +47,7 @@ func (s *service) Create(ctx context.Context, input *dto.CreateInput) (string, e
 		Email:     input.Email,
 		FirstName: input.FirstName,
 		LastName:  input.LastName,
-		Password:  passwordHash,
+		Password:  hashedPassword,
 	}
 
 	return s.repository.Create(ctx, user)
@@ -120,7 +120,7 @@ func (s *service) UpdatePassword(ctx context.Context, id string, input *dto.Upda
 		return ErrNewPasswordIsRequired
 	}
 
-	if !hash.Verify(input.OldPassword, user.Password) {
+	if !hash.Verify(user.Password, input.OldPassword) {
 		return ErrInvalidPassword
 	}
 
@@ -128,12 +128,12 @@ func (s *service) UpdatePassword(ctx context.Context, id string, input *dto.Upda
 		return ErrPasswordsAreSame
 	}
 
-	passwordHash, err := hash.Hash(input.NewPassword)
+	hashedPassword, err := hash.Hash(input.NewPassword)
 	if err != nil {
 		return err
 	}
 
-	user.Password = passwordHash
+	user.Password = hashedPassword
 
 	return s.repository.UpdatePassword(ctx, id, user)
 }

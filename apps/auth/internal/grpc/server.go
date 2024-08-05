@@ -36,7 +36,7 @@ func (s *Server) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResp
 		return nil, err
 	}
 
-	if !hash.Verify(req.Password, user.Password) {
+	if !hash.Verify(user.Password, req.Password) {
 		return nil, status.Error(codes.InvalidArgument, ErrInvalidPassword.Error())
 	}
 
