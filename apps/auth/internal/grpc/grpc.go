@@ -2,13 +2,14 @@ package grpc
 
 import (
 	"context"
+	"net"
+
 	"github.com/yahn1ukov/scribble/apps/auth/internal/config"
 	pb "github.com/yahn1ukov/scribble/proto/auth"
 	userpb "github.com/yahn1ukov/scribble/proto/user"
 	"go.uber.org/fx"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"net"
 )
 
 func NewUser(cfg *config.Config) (userpb.UserServiceClient, error) {

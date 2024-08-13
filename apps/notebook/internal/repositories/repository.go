@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+
 	"github.com/yahn1ukov/scribble/apps/notebook/internal/model"
 )
 

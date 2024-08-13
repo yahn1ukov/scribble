@@ -2,7 +2,7 @@ package resolvers
 
 import (
 	"github.com/yahn1ukov/scribble/apps/gateway/internal/config"
-	"github.com/yahn1ukov/scribble/apps/gateway/internal/http"
+	"github.com/yahn1ukov/scribble/apps/gateway/internal/http/middlewares"
 	authpb "github.com/yahn1ukov/scribble/proto/auth"
 	filepb "github.com/yahn1ukov/scribble/proto/file"
 	notepb "github.com/yahn1ukov/scribble/proto/note"
@@ -16,7 +16,7 @@ import (
 
 type Resolver struct {
 	cfg            *config.Config
-	middleware     *http.Middleware
+	middleware     *middlewares.Middleware
 	userClient     userpb.UserServiceClient
 	notebookClient notebookpb.NotebookServiceClient
 	noteClient     notepb.NoteServiceClient
@@ -26,7 +26,7 @@ type Resolver struct {
 
 func NewResolver(
 	cfg *config.Config,
-	middleware *http.Middleware,
+	middleware *middlewares.Middleware,
 	userClient userpb.UserServiceClient,
 	notebookClient notebookpb.NotebookServiceClient,
 	noteClient notepb.NoteServiceClient,

@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
+
 	"github.com/minio/minio-go/v7"
 	"github.com/yahn1ukov/scribble/apps/file/internal/config"
 	"github.com/yahn1ukov/scribble/apps/file/internal/dto"
@@ -12,7 +14,6 @@ import (
 	pb "github.com/yahn1ukov/scribble/proto/file"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"io"
 )
 
 type Service interface {

@@ -2,14 +2,17 @@ package http
 
 import (
 	"context"
+	"net/http"
+
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/yahn1ukov/scribble/apps/gateway/internal/config"
+	"github.com/yahn1ukov/scribble/apps/gateway/internal/http/handlers"
+	"github.com/yahn1ukov/scribble/apps/gateway/internal/http/middlewares"
 	"go.uber.org/fx"
-	"net/http"
 )
 
-func Run(lc fx.Lifecycle, cfg *config.Config, server *handler.Server, handler *Handler, middleware *Middleware) {
+func Run(lc fx.Lifecycle, cfg *config.Config, server *handler.Server, handler *handlers.Handler, middleware *middlewares.Middleware) {
 	mux := http.NewServeMux()
 
 	mux.Handle("/", playground.Handler("GraphQL playground", "/query"))

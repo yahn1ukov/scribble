@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"errors"
+
 	"github.com/yahn1ukov/scribble/apps/note/internal/dto"
 	"github.com/yahn1ukov/scribble/apps/note/internal/repositories"
 	"github.com/yahn1ukov/scribble/apps/note/internal/services"

@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+
 	"github.com/yahn1ukov/scribble/apps/auth/internal/config"
 	"github.com/yahn1ukov/scribble/libs/hash"
 	"github.com/yahn1ukov/scribble/libs/jwt"

@@ -4,7 +4,6 @@ on: push
 
 env:
   DOCKER_REGISTRY: ghcr.io
-  DOCKER_IMAGE: ghcr.io/yahn1ukov/scribble
 
 permissions:
   packages: write
@@ -36,7 +35,7 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ env.DOCKER_IMAGE }}-${{ matrix.app }}:latest
-            ${{ env.DOCKER_IMAGE }}-${{ matrix.app }}:${{ github.sha }}
+            ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}-${{ matrix.app }}:latest
+            ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}-${{ matrix.app }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

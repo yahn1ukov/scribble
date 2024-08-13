@@ -2,11 +2,12 @@ package grpc
 
 import (
 	"context"
+	"net"
+
 	"github.com/yahn1ukov/scribble/apps/file/internal/config"
 	pb "github.com/yahn1ukov/scribble/proto/file"
 	"go.uber.org/fx"
 	"google.golang.org/grpc"
-	"net"
 )
 
 func Run(lc fx.Lifecycle, cfg *config.Config, server *Server) {

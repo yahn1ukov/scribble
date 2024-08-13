@@ -2,22 +2,23 @@ package jwt
 
 import (
 	"errors"
-	"github.com/golang-jwt/jwt/v5"
 	"time"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 var ErrInvalidToken = errors.New("invalid token")
 
 type Claims struct {
-	ID string `json:"id"`
+	UserID string `json:"id"`
 	jwt.RegisteredClaims
 }
 
-func Generate(id string, secret string, expiry int) (string, error) {
+func Generate(userID string, secret string, expiry int) (string, error) {
 	expirationDate := time.Now().Add(time.Minute * time.Duration(expiry))
 
 	claims := &Claims{
-		ID: id,
+		UserID: userID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationDate),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

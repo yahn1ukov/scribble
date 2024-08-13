@@ -6,12 +6,13 @@ package resolvers
 
 import (
 	"context"
+	"io"
+
 	"github.com/google/uuid"
 	"github.com/yahn1ukov/scribble/apps/gateway/internal/gql/gqlmodels"
 	"github.com/yahn1ukov/scribble/libs/grpc"
 	filepb "github.com/yahn1ukov/scribble/proto/file"
 	notepb "github.com/yahn1ukov/scribble/proto/note"
-	"io"
 )
 
 func (r *mutationResolver) CreateNote(ctx context.Context, notebookID uuid.UUID, input gqlmodels.CreateNoteInput) (bool, error) {

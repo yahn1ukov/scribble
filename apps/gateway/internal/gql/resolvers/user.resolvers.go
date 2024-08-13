@@ -6,6 +6,7 @@ package resolvers
 
 import (
 	"context"
+
 	"github.com/google/uuid"
 	"github.com/yahn1ukov/scribble/apps/gateway/internal/gql/gqlmodels"
 	"github.com/yahn1ukov/scribble/libs/grpc"

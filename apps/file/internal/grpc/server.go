@@ -3,6 +3,8 @@ package grpc
 import (
 	"context"
 	"errors"
+	"io"
+
 	"github.com/yahn1ukov/scribble/apps/file/internal/dto"
 	"github.com/yahn1ukov/scribble/apps/file/internal/repositories"
 	"github.com/yahn1ukov/scribble/apps/file/internal/services"
@@ -10,7 +12,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"io"
 )
 
 type Server struct {

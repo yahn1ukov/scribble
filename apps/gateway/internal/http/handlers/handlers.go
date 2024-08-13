@@ -1,19 +1,21 @@
-package http
+package handlers
 
 import (
+	"net/http"
+
+	"github.com/yahn1ukov/scribble/apps/gateway/internal/http/middlewares"
 	"github.com/yahn1ukov/scribble/libs/grpc"
 	"github.com/yahn1ukov/scribble/libs/respond"
 	filepb "github.com/yahn1ukov/scribble/proto/file"
 	"google.golang.org/grpc/codes"
-	"net/http"
 )
 
 type Handler struct {
-	middleware *Middleware
+	middleware *middlewares.Middleware
 	fileClient filepb.FileServiceClient
 }
 
-func NewHandler(middleware *Middleware, fileClient filepb.FileServiceClient) *Handler {
+func NewHandler(middleware *middlewares.Middleware, fileClient filepb.FileServiceClient) *Handler {
 	return &Handler{
 		middleware: middleware,
 		fileClient: fileClient,
@@ -24,12 +26,12 @@ func (h *Handler) DownloadFile(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	if userID := h.middleware.GetUserIDFromCtx(ctx); userID == "" {
-		respond.Error(w, http.StatusUnauthorized, ErrUnauthorized)
+		respond.Error(w, http.StatusUnauthorized, middlewares.ErrUnauthorized)
 		return
 	}
 
-	noteID := r.PathValue("noteId")
 	id := r.PathValue("fileId")
+	noteID := r.PathValue("noteId")
 
 	file, grpcErr := h.fileClient.DownloadFile(
 		ctx,

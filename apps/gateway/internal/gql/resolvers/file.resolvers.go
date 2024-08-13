@@ -6,11 +6,12 @@ package resolvers
 
 import (
 	"context"
+	"io"
+
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/google/uuid"
 	"github.com/yahn1ukov/scribble/libs/grpc"
 	filepb "github.com/yahn1ukov/scribble/proto/file"
-	"io"
 )
 
 func (r *mutationResolver) UploadFile(ctx context.Context, noteID uuid.UUID, file graphql.Upload) (bool, error) {

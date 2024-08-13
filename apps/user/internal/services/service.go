@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+
 	"github.com/yahn1ukov/scribble/apps/user/internal/dto"
 	"github.com/yahn1ukov/scribble/apps/user/internal/model"
 	"github.com/yahn1ukov/scribble/apps/user/internal/repositories"

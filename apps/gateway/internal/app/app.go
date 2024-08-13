@@ -7,6 +7,8 @@ import (
 	"github.com/yahn1ukov/scribble/apps/gateway/internal/gql/resolvers"
 	"github.com/yahn1ukov/scribble/apps/gateway/internal/grpc"
 	"github.com/yahn1ukov/scribble/apps/gateway/internal/http"
+	"github.com/yahn1ukov/scribble/apps/gateway/internal/http/handlers"
+	"github.com/yahn1ukov/scribble/apps/gateway/internal/http/middlewares"
 	"go.uber.org/fx"
 )
 
@@ -22,8 +24,8 @@ func New() *fx.App {
 			directives.NewDirective,
 			resolvers.NewResolver,
 			gql.New,
-			http.NewMiddleware,
-			http.NewHandler,
+			middlewares.NewMiddleware,
+			handlers.NewHandler,
 		),
 		fx.Invoke(http.Run),
 	)
