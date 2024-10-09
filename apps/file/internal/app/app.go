@@ -10,16 +10,26 @@ import (
 	"go.uber.org/fx"
 )
 
-func New() *fx.App {
+func New(configPath string) *fx.App {
 	return fx.New(
 		fx.Provide(
-			config.New,
+			func() (*config.Config, error) {
+				return config.New(configPath)
+			},
 			database.New,
 			minio.New,
-			fx.Annotate(repositories.NewPostgresRepository, fx.As(new(repositories.Repository))),
-			fx.Annotate(services.NewService, fx.As(new(services.Service))),
-			grpc.NewServer,
 		),
-		fx.Invoke(minio.Run, grpc.Run),
+
+		fx.Provide(
+			fx.Annotate(repositories.New, fx.As(new(repositories.Repository))),
+			fx.Annotate(services.New, fx.As(new(services.Service))),
+		),
+
+		fx.Provide(grpc.New),
+
+		fx.Invoke(
+			minio.Run,
+			grpc.Run,
+		),
 	)
 }

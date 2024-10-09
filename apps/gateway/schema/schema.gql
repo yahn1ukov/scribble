@@ -1,6 +1,7 @@
 type Query
 type Mutation
 
+directive @goField(forceResolver: Boolean, name: String, omittable: Boolean) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 directive @isAuthenticated on FIELD_DEFINITION
 
 scalar UUID

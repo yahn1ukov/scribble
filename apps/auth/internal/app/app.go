@@ -6,13 +6,19 @@ import (
 	"go.uber.org/fx"
 )
 
-func New() *fx.App {
+func New(configPath string) *fx.App {
 	return fx.New(
 		fx.Provide(
-			config.New,
-			grpc.NewUser,
-			grpc.NewServer,
+			func() (*config.Config, error) {
+				return config.New(configPath)
+			},
 		),
+
+		fx.Provide(
+			grpc.NewUser,
+			grpc.New,
+		),
+
 		fx.Invoke(grpc.Run),
 	)
 }

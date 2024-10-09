@@ -13,8 +13,8 @@ type Note {
     id: UUID!
     title: String!
     content: String
+    files: [File]! @goField(forceResolver: true)
     createdAt: Time!
-    files: [File]!
 }
 
 input CreateNoteInput {

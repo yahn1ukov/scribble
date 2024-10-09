@@ -13,15 +13,15 @@ RUN go work init && \
 COPY proto /app/proto
 COPY apps/notebook /app/apps/notebook
 
-RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /app/notebook /app/apps/notebook/cmd/main.go
+RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /temp/notebook /app/apps/notebook/cmd/main.go
 
 FROM alpine:3.20
 
 WORKDIR /app
 
-COPY apps/notebook/configs/config.yaml /app/configs/config.yaml
-COPY --from=builder /app/notebook /app/notebook
+COPY apps/notebook/configs/config.yaml /app/config.yaml
+COPY --from=builder /temp/notebook /app/notebook
 
 EXPOSE 50051
 
-CMD ["/app/notebook"]
+CMD ["/app/notebook", "--config", "/app/config.yaml"]

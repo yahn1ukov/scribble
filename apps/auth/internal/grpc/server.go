@@ -19,7 +19,7 @@ type Server struct {
 	userClient userpb.UserServiceClient
 }
 
-func NewServer(cfg *config.Config, userClient userpb.UserServiceClient) *Server {
+func New(cfg *config.Config, userClient userpb.UserServiceClient) *Server {
 	return &Server{
 		cfg:        cfg,
 		userClient: userClient,

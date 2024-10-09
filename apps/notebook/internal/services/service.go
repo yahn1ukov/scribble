@@ -21,7 +21,9 @@ type service struct {
 	repository repositories.Repository
 }
 
-func NewService(repository repositories.Repository) Service {
+var _ Service = (*service)(nil)
+
+func New(repository repositories.Repository) *service {
 	return &service{
 		repository: repository,
 	}

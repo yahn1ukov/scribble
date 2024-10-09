@@ -7,7 +7,6 @@ package resolvers
 import (
 	"context"
 
-	"github.com/google/uuid"
 	"github.com/yahn1ukov/scribble/apps/gateway/internal/gql/gqlmodels"
 	"github.com/yahn1ukov/scribble/libs/grpc"
 	userpb "github.com/yahn1ukov/scribble/proto/user"
@@ -66,7 +65,7 @@ func (r *mutationResolver) DeleteUser(ctx context.Context) (bool, error) {
 func (r *queryResolver) User(ctx context.Context) (*gqlmodels.User, error) {
 	id := r.middleware.GetUserIDFromCtx(ctx)
 
-	res, err := r.userClient.GetUser(
+	user, err := r.userClient.GetUser(
 		ctx,
 		&userpb.GetUserRequest{
 			Id: id,
@@ -76,13 +75,7 @@ func (r *queryResolver) User(ctx context.Context) (*gqlmodels.User, error) {
 		return nil, grpc.ParseError(err).Error()
 	}
 
-	output := &gqlmodels.User{
-		ID:        uuid.MustParse(res.Id),
-		Email:     res.Email,
-		FirstName: res.FirstName,
-		LastName:  res.LastName,
-		CreatedAt: res.CreatedAt.AsTime(),
-	}
+	output := r.mapper.GRPCUserToUser(user)
 
-	return output, nil
+	return &output, nil
 }

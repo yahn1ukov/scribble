@@ -29,7 +29,9 @@ type service struct {
 	minioClient *minio.Client
 }
 
-func NewService(repository repositories.Repository, cfg *config.Config, minioClient *minio.Client) Service {
+var _ Service = (*service)(nil)
+
+func New(repository repositories.Repository, cfg *config.Config, minioClient *minio.Client) *service {
 	return &service{
 		repository:  repository,
 		cfg:         cfg,

@@ -44,8 +44,8 @@ type Note struct {
 	ID        uuid.UUID `json:"id"`
 	Title     string    `json:"title"`
 	Content   *string   `json:"content,omitempty"`
-	CreatedAt time.Time `json:"createdAt"`
 	Files     []*File   `json:"files"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 type Notebook struct {

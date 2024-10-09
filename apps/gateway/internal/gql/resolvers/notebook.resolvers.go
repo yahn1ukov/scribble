@@ -67,7 +67,7 @@ func (r *mutationResolver) DeleteNotebook(ctx context.Context, id uuid.UUID) (bo
 func (r *queryResolver) Notebooks(ctx context.Context) ([]*gqlmodels.Notebook, error) {
 	userID := r.middleware.GetUserIDFromCtx(ctx)
 
-	res, err := r.notebookClient.ListNotebooks(
+	notebooks, err := r.notebookClient.ListNotebooks(
 		ctx,
 		&notebookpb.ListNotebooksRequest{
 			UserId: userID,
@@ -78,16 +78,9 @@ func (r *queryResolver) Notebooks(ctx context.Context) ([]*gqlmodels.Notebook, e
 	}
 
 	var output []*gqlmodels.Notebook
-	for _, notebook := range res.Notebooks {
-		output = append(
-			output,
-			&gqlmodels.Notebook{
-				ID:          uuid.MustParse(notebook.Id),
-				Title:       notebook.Title,
-				Description: notebook.Description,
-				CreatedAt:   notebook.CreatedAt.AsTime(),
-			},
-		)
+	for _, notebook := range notebooks.Notebooks {
+		mappedNotebook := r.mapper.GRPCNotebookToNotebook(notebook)
+		output = append(output, &mappedNotebook)
 	}
 
 	return output, nil

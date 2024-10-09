@@ -10,13 +10,14 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/yahn1ukov/scribble/apps/gateway/internal/gql/gqlmodels"
+	"github.com/yahn1ukov/scribble/apps/gateway/internal/gql/graph"
 	"github.com/yahn1ukov/scribble/libs/grpc"
 	filepb "github.com/yahn1ukov/scribble/proto/file"
 	notepb "github.com/yahn1ukov/scribble/proto/note"
 )
 
 func (r *mutationResolver) CreateNote(ctx context.Context, notebookID uuid.UUID, input gqlmodels.CreateNoteInput) (bool, error) {
-	res, err := r.noteClient.CreateNote(
+	note, err := r.noteClient.CreateNote(
 		ctx,
 		&notepb.CreateNoteRequest{
 			NotebookId: notebookID.String(),
@@ -41,7 +42,7 @@ func (r *mutationResolver) CreateNote(ctx context.Context, notebookID uuid.UUID,
 
 		if err = stream.Send(
 			&filepb.UploadFileRequest{
-				NoteId:      res.Id,
+				NoteId:      note.Id,
 				Name:        file.Filename,
 				Size:        file.Size,
 				ContentType: file.ContentType,
@@ -93,8 +94,28 @@ func (r *mutationResolver) DeleteNote(ctx context.Context, id uuid.UUID, noteboo
 	return true, nil
 }
 
+func (r *noteResolver) Files(ctx context.Context, obj *gqlmodels.Note) ([]*gqlmodels.File, error) {
+	files, err := r.fileClient.ListFiles(
+		ctx,
+		&filepb.ListFilesRequest{
+			NoteId: obj.ID.String(),
+		},
+	)
+	if err != nil {
+		return nil, grpc.ParseError(err).Error()
+	}
+
+	output := make([]*gqlmodels.File, 0, len(files.Files))
+	for _, file := range files.Files {
+		mappedFile := r.mapper.GRPCFileToFile(file)
+		output = append(output, &mappedFile)
+	}
+
+	return output, nil
+}
+
 func (r *queryResolver) Note(ctx context.Context, id uuid.UUID, notebookID uuid.UUID) (*gqlmodels.Note, error) {
-	resNote, err := r.noteClient.GetNote(
+	note, err := r.noteClient.GetNote(
 		ctx,
 		&notepb.GetNoteRequest{
 			Id:         id.String(),
@@ -105,43 +126,13 @@ func (r *queryResolver) Note(ctx context.Context, id uuid.UUID, notebookID uuid.
 		return nil, grpc.ParseError(err).Error()
 	}
 
-	resFiles, err := r.fileClient.ListFiles(
-		ctx,
-		&filepb.ListFilesRequest{
-			NoteId: id.String(),
-		},
-	)
-	if err != nil {
-		return nil, grpc.ParseError(err).Error()
-	}
+	output := r.mapper.GRPCNoteToNote(note)
 
-	var files []*gqlmodels.File
-	for _, file := range resFiles.Files {
-		files = append(
-			files,
-			&gqlmodels.File{
-				ID:          uuid.MustParse(file.Id),
-				Name:        file.Name,
-				Size:        file.Size,
-				ContentType: file.ContentType,
-				CreatedAt:   file.CreatedAt.AsTime(),
-			},
-		)
-	}
-
-	output := &gqlmodels.Note{
-		ID:        uuid.MustParse(resNote.Id),
-		Title:     resNote.Title,
-		Content:   resNote.Content,
-		CreatedAt: resNote.CreatedAt.AsTime(),
-		Files:     files,
-	}
-
-	return output, nil
+	return &output, nil
 }
 
 func (r *queryResolver) Notes(ctx context.Context, notebookID uuid.UUID) ([]*gqlmodels.Note, error) {
-	res, err := r.noteClient.ListNotes(
+	notes, err := r.noteClient.ListNotes(
 		ctx,
 		&notepb.ListNotesRequest{
 			NotebookId: notebookID.String(),
@@ -152,17 +143,14 @@ func (r *queryResolver) Notes(ctx context.Context, notebookID uuid.UUID) ([]*gql
 	}
 
 	var output []*gqlmodels.Note
-	for _, note := range res.Notes {
-		output = append(
-			output,
-			&gqlmodels.Note{
-				ID:        uuid.MustParse(note.Id),
-				Title:     note.Title,
-				Content:   note.Content,
-				CreatedAt: note.CreatedAt.AsTime(),
-			},
-		)
+	for _, note := range notes.Notes {
+		mappedNote := r.mapper.GRPCNoteToNote(note)
+		output = append(output, &mappedNote)
 	}
 
 	return output, nil
 }
+
+func (r *Resolver) Note() graph.NoteResolver { return &noteResolver{r} }
+
+type noteResolver struct{ *Resolver }

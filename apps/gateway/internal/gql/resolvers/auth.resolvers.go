@@ -13,7 +13,7 @@ import (
 )
 
 func (r *mutationResolver) Login(ctx context.Context, input gqlmodels.LoginInput) (*gqlmodels.AuthOutput, error) {
-	res, err := r.authClient.Login(
+	auth, err := r.authClient.Login(
 		ctx,
 		&authpb.LoginRequest{
 			Email:    input.Email,
@@ -25,14 +25,14 @@ func (r *mutationResolver) Login(ctx context.Context, input gqlmodels.LoginInput
 	}
 
 	output := &gqlmodels.AuthOutput{
-		Token: res.Token,
+		Token: auth.Token,
 	}
 
 	return output, nil
 }
 
 func (r *mutationResolver) Register(ctx context.Context, input gqlmodels.RegisterInput) (*gqlmodels.AuthOutput, error) {
-	res, err := r.authClient.Register(
+	auth, err := r.authClient.Register(
 		ctx,
 		&authpb.RegisterRequest{
 			Email:     input.Email,
@@ -46,7 +46,7 @@ func (r *mutationResolver) Register(ctx context.Context, input gqlmodels.Registe
 	}
 
 	output := &gqlmodels.AuthOutput{
-		Token: res.Token,
+		Token: auth.Token,
 	}
 
 	return output, nil

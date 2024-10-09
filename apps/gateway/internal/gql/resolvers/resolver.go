@@ -2,6 +2,7 @@ package resolvers
 
 import (
 	"github.com/yahn1ukov/scribble/apps/gateway/internal/config"
+	"github.com/yahn1ukov/scribble/apps/gateway/internal/gql/mappers"
 	"github.com/yahn1ukov/scribble/apps/gateway/internal/http/middlewares"
 	authpb "github.com/yahn1ukov/scribble/proto/auth"
 	filepb "github.com/yahn1ukov/scribble/proto/file"
@@ -17,29 +18,32 @@ import (
 type Resolver struct {
 	cfg            *config.Config
 	middleware     *middlewares.Middleware
-	userClient     userpb.UserServiceClient
-	notebookClient notebookpb.NotebookServiceClient
-	noteClient     notepb.NoteServiceClient
-	fileClient     filepb.FileServiceClient
+	mapper         *mappers.Mapper
 	authClient     authpb.AuthServiceClient
+	fileClient     filepb.FileServiceClient
+	noteClient     notepb.NoteServiceClient
+	notebookClient notebookpb.NotebookServiceClient
+	userClient     userpb.UserServiceClient
 }
 
-func NewResolver(
+func New(
 	cfg *config.Config,
 	middleware *middlewares.Middleware,
-	userClient userpb.UserServiceClient,
-	notebookClient notebookpb.NotebookServiceClient,
-	noteClient notepb.NoteServiceClient,
-	fileClient filepb.FileServiceClient,
+	mapper *mappers.Mapper,
 	authClient authpb.AuthServiceClient,
+	fileClient filepb.FileServiceClient,
+	noteClient notepb.NoteServiceClient,
+	notebookClient notebookpb.NotebookServiceClient,
+	userClient userpb.UserServiceClient,
 ) *Resolver {
 	return &Resolver{
 		cfg:            cfg,
 		middleware:     middleware,
-		userClient:     userClient,
-		notebookClient: notebookClient,
-		noteClient:     noteClient,
-		fileClient:     fileClient,
+		mapper:         mapper,
 		authClient:     authClient,
+		fileClient:     fileClient,
+		noteClient:     noteClient,
+		notebookClient: notebookClient,
+		userClient:     userClient,
 	}
 }

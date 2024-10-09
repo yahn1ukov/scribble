@@ -22,15 +22,15 @@ COPY libs/respond /app/libs/respond
 COPY proto /app/proto
 COPY apps/gateway /app/apps/gateway
 
-RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /app/gateway /app/apps/gateway/cmd/main.go
+RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /temp/gateway /app/apps/gateway/cmd/main.go
 
 FROM alpine:3.20
 
 WORKDIR /app
 
-COPY apps/gateway/configs/config.yaml /app/configs/config.yaml
-COPY --from=builder /app/gateway /app/gateway
+COPY apps/gateway/configs/config.yaml /app/config.yaml
+COPY --from=builder /temp/gateway /app/gateway
 
 EXPOSE 8000
 
-CMD ["/app/gateway"]
+CMD ["/app/gateway", "--config", "/app/config.yaml"]

@@ -16,15 +16,15 @@ COPY libs/hash /app/libs/hash
 COPY proto /app/proto
 COPY apps/user /app/apps/user
 
-RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /app/user /app/apps/user/cmd/main.go
+RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /temp/user /app/apps/user/cmd/main.go
 
 FROM alpine:3.20
 
 WORKDIR /app
 
-COPY apps/user/configs/config.yaml /app/configs/config.yaml
-COPY --from=builder /app/user /app/user
+COPY apps/user/configs/config.yaml /app/config.yaml
+COPY --from=builder /temp/user /app/user
 
 EXPOSE 50050
 
-CMD ["/app/user"]
+CMD ["/app/user", "--config", "/app/config.yaml"]

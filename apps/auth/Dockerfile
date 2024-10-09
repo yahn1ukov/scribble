@@ -19,15 +19,15 @@ COPY libs/jwt /app/libs/jwt
 COPY proto /app/proto
 COPY apps/auth /app/apps/auth
 
-RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /app/auth /app/apps/auth/cmd/main.go
+RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /temp/auth /app/apps/auth/cmd/main.go
 
 FROM alpine:3.20
 
 WORKDIR /app
 
-COPY apps/auth/configs/config.yaml /app/configs/config.yaml
-COPY --from=builder /app/auth /app/auth
+COPY apps/auth/configs/config.yaml /app/config.yaml
+COPY --from=builder /temp/auth /app/auth
 
 EXPOSE 50054
 
-CMD ["/app/auth"]
+CMD ["/app/auth", "--config", "/app/config.yaml"]

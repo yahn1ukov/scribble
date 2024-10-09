@@ -13,15 +13,15 @@ RUN go work init && \
 COPY proto /app/proto
 COPY apps/file /app/apps/file
 
-RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /app/file /app/apps/file/cmd/main.go
+RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /temp/file /app/apps/file/cmd/main.go
 
 FROM alpine:3.20
 
 WORKDIR /app
 
-COPY apps/file/configs/config.yaml /app/configs/config.yaml
-COPY --from=builder /app/file /app/file
+COPY apps/file/configs/config.yaml /app/config.yaml
+COPY --from=builder /temp/file /app/file
 
 EXPOSE 50053
 
-CMD ["/app/file"]
+CMD ["/app/file", "--config", "/app/config.yaml"]

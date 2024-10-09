@@ -20,7 +20,7 @@ type Server struct {
 	service services.Service
 }
 
-func NewServer(service services.Service) *Server {
+func New(service services.Service) *Server {
 	return &Server{
 		service: service,
 	}

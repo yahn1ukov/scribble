@@ -15,7 +15,7 @@ type Handler struct {
 	fileClient filepb.FileServiceClient
 }
 
-func NewHandler(middleware *middlewares.Middleware, fileClient filepb.FileServiceClient) *Handler {
+func New(middleware *middlewares.Middleware, fileClient filepb.FileServiceClient) *Handler {
 	return &Handler{
 		middleware: middleware,
 		fileClient: fileClient,
